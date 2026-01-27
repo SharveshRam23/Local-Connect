@@ -41,4 +41,6 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("androidx.work:work-runtime:2.9.0")
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler)
 }

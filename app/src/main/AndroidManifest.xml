@@ -6,8 +6,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <!-- Optional (if you use call feature later) -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
 
     <application
@@ -21,11 +19,6 @@
         android:theme="@style/Theme.Localconnect"
         tools:targetApi="31">
 
-        <!-- Issue Reporting Screen -->
-        <activity
-            android:name=".ui.issue.ReportIssueActivity"
-            android:exported="false" />
-
         <!-- Main Screen -->
         <activity
             android:name=".MainActivity"
@@ -37,6 +30,42 @@
             </intent-filter>
 
         </activity>
+
+        <!-- Issue Reporting -->
+        <activity
+            android:name=".ui.issue.ReportIssueActivity"
+            android:exported="false" />
+
+        <!-- User Activities -->
+        <activity
+            android:name=".ui.user.UserRegistrationActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.user.UserHomeActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.user.ServiceListActivity"
+            android:exported="false" />
+
+        <!-- Provider Activities -->
+        <activity
+            android:name=".ui.provider.ProviderRegistrationActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.provider.ProviderDashboardActivity"
+            android:exported="false" />
+
+        <!-- Admin Activities -->
+        <activity
+            android:name=".ui.admin.AdminLoginActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.admin.AdminDashboardActivity"
+            android:exported="false" />
 
     </application>
 

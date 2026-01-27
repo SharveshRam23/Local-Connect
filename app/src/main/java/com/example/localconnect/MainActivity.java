@@ -1,29 +1,39 @@
 package com.example.localconnect;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
+import com.example.localconnect.ui.admin.AdminLoginActivity;
+import com.example.localconnect.ui.provider.ProviderRegistrationActivity;
+import com.example.localconnect.ui.user.UserRegistrationActivity;
+import com.example.localconnect.worker.NoticeWorker;
+
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.btnReportIssue).setOnClickListener(v -> {
-            startActivity(new android.content.Intent(this, com.example.localconnect.ui.issue.ReportIssueActivity.class));
-        });
+        Button btnUserMode = findViewById(R.id.btnUserMode);
+        Button btnProviderMode = findViewById(R.id.btnProviderMode);
+        Button btnAdminMode = findViewById(R.id.btnAdminMode);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        btnUserMode.setOnClickListener(v -> startActivity(new Intent(this, UserRegistrationActivity.class)));
+        btnProviderMode.setOnClickListener(v -> startActivity(new Intent(this, ProviderRegistrationActivity.class)));
+        btnAdminMode.setOnClickListener(v -> startActivity(new Intent(this, AdminLoginActivity.class)));
+
+        // Schedule Worker
+        PeriodicWorkRequest noticeWorkRequest = new PeriodicWorkRequest.Builder(NoticeWorker.class, 15,
+                TimeUnit.MINUTES)
+                .build();
+        WorkManager.getInstance(this).enqueue(noticeWorkRequest);
     }
 }
