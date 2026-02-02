@@ -31,8 +31,9 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.NoticeView
     @Override
     public void onBindViewHolder(@NonNull NoticeViewHolder holder, int position) {
         Notice notice = notices.get(position);
-        holder.tvNoticeTitle.setText(notice.getNoticeTitle());
-        holder.tvNoticeDescription.setText(notice.getNoticeDescription());
+        holder.tvNoticeTitle.setText(notice.getTitle());
+        holder.tvNoticeDescription.setText(notice.getDescription());
+
     }
 
     @Override

@@ -26,4 +26,7 @@ public interface ProviderDao {
 
     @Query("SELECT * FROM service_providers")
     LiveData<List<ServiceProvider>> getAllServiceProviders();
+
+    @Query("SELECT * FROM service_providers WHERE isApproved = 1")
+    List<ServiceProvider> getAllApprovedProviders();
 }
