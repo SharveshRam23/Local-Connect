@@ -39,7 +39,7 @@ public class AddNoticeActivity extends AppCompatActivity {
                 } else {
                     String title = etNoticeTitle.getText().toString();
                     String description = etNoticeDescription.getText().toString();
-                    Notice notice = new Notice(title, description, "GLOBAL", "", System.currentTimeMillis());
+                    Notice notice = new Notice(title, description, "GLOBAL", System.currentTimeMillis());
                     noticeViewModel.insert(notice);
                     finish();
                 }

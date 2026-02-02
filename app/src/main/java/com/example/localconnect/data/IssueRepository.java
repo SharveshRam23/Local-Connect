@@ -8,6 +8,8 @@ import com.example.localconnect.data.dao.IssueDao;
 import com.example.localconnect.model.Issue;
 
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 public class IssueRepository {
 
@@ -30,8 +32,10 @@ public class IssueRepository {
         AppDatabase.databaseWriteExecutor.execute(() -> issueDao.delete(issue));
     }
 
-    public LiveData<Issue> getIssueById(int issueId) {
-        return issueDao.getIssueById(issueId);
+    public Issue getIssueById(int issueId) throws Exception {
+        Callable<Issue> callable = () -> issueDao.getIssueById(issueId);
+        Future<Issue> future = AppDatabase.databaseWriteExecutor.submit(callable);
+        return future.get();
     }
 
     public LiveData<List<Issue>> getIssuesByArea(String area) {

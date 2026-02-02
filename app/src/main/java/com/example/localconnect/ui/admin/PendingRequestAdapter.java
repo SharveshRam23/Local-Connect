@@ -32,7 +32,7 @@ public class PendingRequestAdapter extends RecyclerView.Adapter<PendingRequestAd
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ServiceProvider provider = pendingRequests.get(position);
-        holder.tvProviderName.setText(provider.getName());
+        holder.tvProviderName.setText(provider.getServiceType());
 
         holder.btnApprove.setOnClickListener(v -> {
             // Handle approve logic
