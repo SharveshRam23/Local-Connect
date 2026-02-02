@@ -24,7 +24,7 @@ public interface IssueDao {
     void delete(Issue issue);
 
     @Query("SELECT * FROM issues WHERE issueId = :issueId")
-    LiveData<Issue> getIssueById(int issueId);
+    Issue getIssueById(int issueId);
 
     @Query("SELECT * FROM issues WHERE area = :area ORDER BY timestamp DESC")
     LiveData<List<Issue>> getIssuesByArea(String area);
