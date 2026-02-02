@@ -13,7 +13,7 @@ import com.example.localconnect.model.ServiceProvider;
 
 import java.util.List;
 
-public class ServiceProviderAdapter extends RecyclerView.Adapter<ServiceProviderAdapter.ServiceProviderViewHolder> {
+public class ServiceProviderAdapter extends RecyclerView.Adapter<ServiceProviderAdapter.ViewHolder> {
 
     private List<ServiceProvider> serviceProviders;
 
@@ -23,18 +23,17 @@ public class ServiceProviderAdapter extends RecyclerView.Adapter<ServiceProvider
 
     @NonNull
     @Override
-    public ServiceProviderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_service_provider, parent, false);
-        return new ServiceProviderViewHolder(itemView);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_service_provider, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ServiceProviderViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ServiceProvider serviceProvider = serviceProviders.get(position);
-        holder.tvProviderName.setText(serviceProvider.getName());
-        holder.tvProviderService.setText(serviceProvider.getCategory());
-        holder.tvProviderLocation.setText(serviceProvider.getAddress());
+        holder.tvProviderName.setText(serviceProvider.getServiceType());
+        holder.tvProviderService.setText(serviceProvider.getPhone());
+        holder.tvProviderLocation.setText(serviceProvider.getArea());
     }
 
     @Override
@@ -42,10 +41,10 @@ public class ServiceProviderAdapter extends RecyclerView.Adapter<ServiceProvider
         return serviceProviders.size();
     }
 
-    static class ServiceProviderViewHolder extends RecyclerView.ViewHolder {
-        private TextView tvProviderName, tvProviderService, tvProviderLocation;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView tvProviderName, tvProviderService, tvProviderLocation;
 
-        public ServiceProviderViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvProviderName = itemView.findViewById(R.id.tvProviderName);
             tvProviderService = itemView.findViewById(R.id.tvProviderService);
