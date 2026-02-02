@@ -24,15 +24,17 @@ public class ServiceProviderAdapter extends RecyclerView.Adapter<ServiceProvider
     @NonNull
     @Override
     public ServiceProviderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_service_provider, parent, false);
-        return new ServiceProviderViewHolder(view);
+        View itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_service_provider, parent, false);
+        return new ServiceProviderViewHolder(itemView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ServiceProviderViewHolder holder, int position) {
         ServiceProvider serviceProvider = serviceProviders.get(position);
         holder.tvProviderName.setText(serviceProvider.getName());
-        holder.tvProviderService.setText(serviceProvider.getService());
+        holder.tvProviderService.setText(serviceProvider.getCategory());
+        holder.tvProviderLocation.setText(serviceProvider.getAddress());
     }
 
     @Override
@@ -41,13 +43,13 @@ public class ServiceProviderAdapter extends RecyclerView.Adapter<ServiceProvider
     }
 
     static class ServiceProviderViewHolder extends RecyclerView.ViewHolder {
-        TextView tvProviderName;
-        TextView tvProviderService;
+        private TextView tvProviderName, tvProviderService, tvProviderLocation;
 
         public ServiceProviderViewHolder(@NonNull View itemView) {
             super(itemView);
             tvProviderName = itemView.findViewById(R.id.tvProviderName);
             tvProviderService = itemView.findViewById(R.id.tvProviderService);
+            tvProviderLocation = itemView.findViewById(R.id.tvProviderLocation);
         }
     }
 }

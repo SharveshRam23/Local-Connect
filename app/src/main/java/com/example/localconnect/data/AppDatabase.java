@@ -1,7 +1,6 @@
 package com.example.localconnect.data;
 
 import android.content.Context;
-import android.os.AsyncTask;
 
 import androidx.annotation.NonNull;
 import androidx.room.Database;
@@ -18,7 +17,10 @@ import com.example.localconnect.model.Notice;
 import com.example.localconnect.model.ServiceProvider;
 import com.example.localconnect.model.User;
 
-@Database(entities = {User.class, ServiceProvider.class, Notice.class, Issue.class}, version = 2)
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+@Database(entities = {User.class, ServiceProvider.class, Notice.class, Issue.class}, version = 3)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase instance;

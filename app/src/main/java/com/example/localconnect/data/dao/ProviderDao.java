@@ -1,5 +1,6 @@
 package com.example.localconnect.data.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -12,26 +13,17 @@ import java.util.List;
 @Dao
 public interface ProviderDao {
     @Insert
-    void insert(ServiceProvider provider);
+    void insert(ServiceProvider serviceProvider);
 
     @Update
-    void update(ServiceProvider provider);
+    void update(ServiceProvider serviceProvider);
 
-    @Query("DELETE FROM service_providers")
-    void deleteAll();
-
-    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1")
-    List<ServiceProvider> getAllApprovedProviders();
-
-    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1 AND category = :category")
-    List<ServiceProvider> getProvidersByCategory(String category);
-
-    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1 AND address LIKE '%' || :pincode || '%'")
-    List<ServiceProvider> getProvidersByPincode(String pincode);
-
-    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1 AND category = :category AND address LIKE '%' || :pincode || '%'")
-    List<ServiceProvider> getProvidersByCategoryAndPincode(String category, String pincode);
+    @Query("SELECT * FROM service_providers WHERE isApproved = 1")
+    LiveData<List<ServiceProvider>> getApprovedServiceProviders();
 
     @Query("SELECT * FROM service_providers WHERE isApproved = 0")
-    List<ServiceProvider> getPendingProviders(); // For Admin
+    LiveData<List<ServiceProvider>> getPendingServiceProviders();
+
+    @Query("SELECT * FROM service_providers")
+    LiveData<List<ServiceProvider>> getAllServiceProviders();
 }

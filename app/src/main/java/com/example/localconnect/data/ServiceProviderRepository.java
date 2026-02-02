@@ -1,55 +1,53 @@
-package com.example.localconnect.ui.user;
+package com.example.localconnect.data;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.app.Application;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.lifecycle.LiveData;
 
-import com.example.localconnect.R;
+import com.example.localconnect.data.dao.ProviderDao;
 import com.example.localconnect.model.ServiceProvider;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class ServiceProviderAdapter extends RecyclerView.Adapter<ServiceProviderAdapter.ServiceProviderViewHolder> {
+public class ServiceProviderRepository {
+    private ProviderDao mProviderDao;
+    private LiveData<List<ServiceProvider>> mAllProviders;
+    private LiveData<List<ServiceProvider>> mPendingProviders;
+    private LiveData<List<ServiceProvider>> mApprovedProviders;
+    private final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(4);
 
-    private List<ServiceProvider> serviceProviders;
 
-    public ServiceProviderAdapter(List<ServiceProvider> serviceProviders) {
-        this.serviceProviders = serviceProviders;
+    public ServiceProviderRepository(Application application) {
+        AppDatabase db = AppDatabase.getDatabase(application);
+        mProviderDao = db.providerDao();
+        mAllProviders = mProviderDao.getAllServiceProviders();
+        mPendingProviders = mProviderDao.getPendingServiceProviders();
+        mApprovedProviders = mProviderDao.getApprovedServiceProviders();
     }
 
-    @NonNull
-    @Override
-    public ServiceProviderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_service_provider, parent, false);
-        return new ServiceProviderViewHolder(itemView);
+    public LiveData<List<ServiceProvider>> getAllServiceProviders() {
+        return mAllProviders;
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull ServiceProviderViewHolder holder, int position) {
-        ServiceProvider serviceProvider = serviceProviders.get(position);
-        holder.tvProviderName.setText(serviceProvider.getName());
-        holder.tvProviderService.setText(serviceProvider.getCategory());
-        holder.tvProviderLocation.setText(serviceProvider.getAddress());
+    public LiveData<List<ServiceProvider>> getPendingProviders() {
+        return mPendingProviders;
     }
 
-    @Override
-    public int getItemCount() {
-        return serviceProviders.size();
+    public LiveData<List<ServiceProvider>> getApprovedProviders() {
+        return mApprovedProviders;
     }
 
-    static class ServiceProviderViewHolder extends RecyclerView.ViewHolder {
-        private TextView tvProviderName, tvProviderService, tvProviderLocation;
+    public void insert(ServiceProvider serviceProvider) {
+        databaseWriteExecutor.execute(() -> {
+            mProviderDao.insert(serviceProvider);
+        });
+    }
 
-        public ServiceProviderViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvProviderName = itemView.findViewById(R.id.tvProviderName);
-            tvProviderService = itemView.findViewById(R.id.tvProviderService);
-            tvProviderLocation = itemView.findViewById(R.id.tvProviderLocation);
-        }
+    public void update(ServiceProvider serviceProvider) {
+        databaseWriteExecutor.execute(() -> {
+            mProviderDao.update(serviceProvider);
+        });
     }
 }
