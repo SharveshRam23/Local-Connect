@@ -19,10 +19,10 @@ public class IssueViewModel extends AndroidViewModel {
     public IssueViewModel (Application application) {
         super(application);
         mRepository = new IssueRepository(application);
-        mAllIssues = mRepository.getAllIssues();
+        mAllIssues = mRepository.getIssuesByArea("");
     }
 
-    public LiveData<List<Issue>> getAllIssues() { return mAllIssues; }
+    public LiveData<List<Issue>> getIssuesByArea(String area) { return mRepository.getIssuesByArea(area); }
 
     public void insert(Issue issue) { mRepository.insert(issue); }
 }

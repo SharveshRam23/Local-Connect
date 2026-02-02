@@ -18,12 +18,14 @@ public class ServiceProvider {
     private String serviceType;
     private String phone;
     private String area;
+    private String status;
 
-    public ServiceProvider(int userId, String serviceType, String phone, String area) {
+    public ServiceProvider(int userId, String serviceType, String phone, String area, String status) {
         this.userId = userId;
         this.serviceType = serviceType;
         this.phone = phone;
         this.area = area;
+        this.status = status;
     }
 
     public int getProviderId() {
@@ -48,5 +50,13 @@ public class ServiceProvider {
 
     public String getArea() {
         return area;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

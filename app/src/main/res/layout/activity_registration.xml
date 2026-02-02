@@ -28,10 +28,16 @@
         android:hint="Password"
         android:inputType="textPassword" />
 
+    <EditText
+        android:id="@+id/etArea"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Area" />
+
     <RadioGroup
         android:id="@+id/rgRoles"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android.layout_height="wrap_content"
         android:orientation="horizontal">
 
         <RadioButton

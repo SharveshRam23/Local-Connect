@@ -5,6 +5,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.example.localconnect.model.ServiceProvider;
 
@@ -15,9 +16,18 @@ public interface ServiceProviderDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(ServiceProvider serviceProvider);
 
+    @Update
+    void update(ServiceProvider serviceProvider);
+
     @Query("SELECT * FROM service_providers WHERE area = :area")
     LiveData<List<ServiceProvider>> getServiceProvidersByArea(String area);
 
     @Query("SELECT * FROM service_providers WHERE userId = :userId LIMIT 1")
     ServiceProvider getServiceProviderByUserId(int userId);
+
+    @Query("SELECT * FROM service_providers WHERE status = 'pending'")
+    LiveData<List<ServiceProvider>> getPendingProviders();
+
+    @Query("SELECT * FROM service_providers WHERE status = 'approved'")
+    LiveData<List<ServiceProvider>> getApprovedProviders();
 }

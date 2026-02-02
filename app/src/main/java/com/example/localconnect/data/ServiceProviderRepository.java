@@ -25,6 +25,10 @@ public class ServiceProviderRepository {
         AppDatabase.databaseWriteExecutor.execute(() -> serviceProviderDao.insert(serviceProvider));
     }
 
+    public void update(ServiceProvider serviceProvider) {
+        AppDatabase.databaseWriteExecutor.execute(() -> serviceProviderDao.update(serviceProvider));
+    }
+
     public LiveData<List<ServiceProvider>> getServiceProvidersByArea(String area) {
         return serviceProviderDao.getServiceProvidersByArea(area);
     }
@@ -33,5 +37,13 @@ public class ServiceProviderRepository {
         Callable<ServiceProvider> callable = () -> serviceProviderDao.getServiceProviderByUserId(userId);
         Future<ServiceProvider> future = AppDatabase.databaseWriteExecutor.submit(callable);
         return future.get();
+    }
+
+    public LiveData<List<ServiceProvider>> getPendingProviders() {
+        return serviceProviderDao.getPendingProviders();
+    }
+
+    public LiveData<List<ServiceProvider>> getApprovedProviders() {
+        return serviceProviderDao.getApprovedProviders();
     }
 }
