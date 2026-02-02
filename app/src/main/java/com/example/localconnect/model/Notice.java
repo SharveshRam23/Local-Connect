@@ -6,18 +6,28 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "notices")
 public class Notice {
     @PrimaryKey(autoGenerate = true)
-    public int id;
-    public String title;
-    public String content;
-    public String type; // "GLOBAL" or "AREA"
-    public String targetPincode; // Null for global
-    public long scheduledTime;
+    private int id;
+    private String title;
+    private String description;
 
-    public Notice(String title, String content, String type, String targetPincode, long scheduledTime) {
+    public Notice(String title, String description) {
         this.title = title;
-        this.content = content;
-        this.type = type;
-        this.targetPincode = targetPincode;
-        this.scheduledTime = scheduledTime;
+        this.description = description;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

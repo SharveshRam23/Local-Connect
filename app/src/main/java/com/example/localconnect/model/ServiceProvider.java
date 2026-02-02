@@ -6,20 +6,44 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "service_providers")
 public class ServiceProvider {
     @PrimaryKey(autoGenerate = true)
-    public int id;
-    public String name;
-    public String category;
-    public String pincode;
-    public String phone;
-    public boolean isApproved;
-    public boolean isAvailable;
+    private int id;
+    private String name;
+    private String category;
+    private String contact;
+    private boolean isApproved;
 
-    public ServiceProvider(String name, String category, String pincode, String phone) {
+    public ServiceProvider(String name, String category, String contact, boolean isApproved) {
         this.name = name;
         this.category = category;
-        this.pincode = pincode;
-        this.phone = phone;
-        this.isApproved = false; // Default false
-        this.isAvailable = true; // Default true
+        this.contact = contact;
+        this.isApproved = isApproved;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public String getContact() {
+        return contact;
+    }
+
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
     }
 }

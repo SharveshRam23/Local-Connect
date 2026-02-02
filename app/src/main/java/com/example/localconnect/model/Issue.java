@@ -6,16 +6,28 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "issues")
 public class Issue {
     @PrimaryKey(autoGenerate = true)
-    public int id;
-    public String description;
-    public String imagePath;
-    public String pincode;
-    public long timestamp;
+    private int id;
+    private String title;
+    private String description;
 
-    public Issue(String description, String imagePath, String pincode, long timestamp) {
+    public Issue(String title, String description) {
+        this.title = title;
         this.description = description;
-        this.imagePath = imagePath;
-        this.pincode = pincode;
-        this.timestamp = timestamp;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }
