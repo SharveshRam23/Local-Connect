@@ -13,7 +13,7 @@ import com.example.localconnect.model.Notice;
 
 import java.util.List;
 
-public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.NoticeViewHolder> {
+public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.ViewHolder> {
 
     private List<Notice> notices;
 
@@ -23,17 +23,16 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.NoticeView
 
     @NonNull
     @Override
-    public NoticeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_notice, parent, false);
-        return new NoticeViewHolder(view);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull NoticeViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Notice notice = notices.get(position);
         holder.tvNoticeTitle.setText(notice.getTitle());
-        holder.tvNoticeDescription.setText(notice.getDescription());
-
+        holder.tvNoticeDescription.setText(notice.getMessage());
     }
 
     @Override
@@ -41,11 +40,10 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.NoticeView
         return notices.size();
     }
 
-    static class NoticeViewHolder extends RecyclerView.ViewHolder {
-        TextView tvNoticeTitle;
-        TextView tvNoticeDescription;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView tvNoticeTitle, tvNoticeDescription;
 
-        public NoticeViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvNoticeTitle = itemView.findViewById(R.id.tvNoticeTitle);
             tvNoticeDescription = itemView.findViewById(R.id.tvNoticeDescription);

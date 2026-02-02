@@ -3,20 +3,20 @@ package com.example.localconnect.ui.user;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.localconnect.R;
-import com.example.localconnect.data.AppDatabase;
-import com.example.localconnect.model.Notice;
-import com.example.localconnect.model.ServiceProvider;
-
-import java.util.List;
+import com.example.localconnect.viewmodel.NoticeViewModel;
+import com.example.localconnect.viewmodel.ServiceProviderViewModel;
 
 public class HomeActivity extends AppCompatActivity {
 
     private NoticeAdapter noticeAdapter;
     private ServiceProviderAdapter serviceProviderAdapter;
+    private NoticeViewModel noticeViewModel;
+    private ServiceProviderViewModel serviceProviderViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,19 +29,20 @@ public class HomeActivity extends AppCompatActivity {
         recyclerViewNotices.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewServiceProviders.setLayoutManager(new LinearLayoutManager(this));
 
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            // Hardcoded pincode for now
-            String pincode = "123456";
-            List<Notice> notices = AppDatabase.getDatabase(getApplicationContext()).noticeDao().getNoticesForUser(pincode);
-            List<ServiceProvider> serviceProviders = AppDatabase.getDatabase(getApplicationContext()).providerDao().getAllApprovedProviders();
+        noticeViewModel = new ViewModelProvider(this).get(NoticeViewModel.class);
+        serviceProviderViewModel = new ViewModelProvider(this).get(ServiceProviderViewModel.class);
 
-            runOnUiThread(() -> {
-                noticeAdapter = new NoticeAdapter(notices);
-                serviceProviderAdapter = new ServiceProviderAdapter(serviceProviders);
+        // Hardcoded pincode for now
+        String pincode = "123456";
 
-                recyclerViewNotices.setAdapter(noticeAdapter);
-                recyclerViewServiceProviders.setAdapter(serviceProviderAdapter);
-            });
+        noticeViewModel.getNoticesByArea(pincode).observe(this, notices -> {
+            noticeAdapter = new NoticeAdapter(notices);
+            recyclerViewNotices.setAdapter(noticeAdapter);
+        });
+
+        serviceProviderViewModel.getApprovedProviders().observe(this, serviceProviders -> {
+            serviceProviderAdapter = new ServiceProviderAdapter(serviceProviders);
+            recyclerViewServiceProviders.setAdapter(serviceProviderAdapter);
         });
     }
 }

@@ -35,7 +35,7 @@ public class ViewIssuesActivity extends AppCompatActivity {
         rvIssues.setAdapter(adapter);
 
         issueViewModel = new ViewModelProvider(this).get(IssueViewModel.class);
-        issueViewModel.getAllIssues().observe(this, issueList -> {
+        issueViewModel.getIssuesByArea("dummy").observe(this, issueList -> {
             adapter.setIssues(issueList);
         });
     }

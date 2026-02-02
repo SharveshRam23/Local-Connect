@@ -19,7 +19,7 @@ import com.example.localconnect.viewmodel.UserViewModel;
 
 public class RegistrationActivity extends AppCompatActivity {
 
-    private EditText etRegisterName, etRegisterEmail, etRegisterPassword, etServiceType;
+    private EditText etRegisterName, etRegisterEmail, etRegisterPassword, etServiceType, etArea;
     private Button btnRegister;
     private TextView tvGoToLogin;
     private UserViewModel userViewModel;
@@ -36,6 +36,7 @@ public class RegistrationActivity extends AppCompatActivity {
         etRegisterEmail = findViewById(R.id.etRegisterEmail);
         etRegisterPassword = findViewById(R.id.etRegisterPassword);
         etServiceType = findViewById(R.id.etServiceType);
+        etArea = findViewById(R.id.etArea);
         btnRegister = findViewById(R.id.btnRegister);
         tvGoToLogin = findViewById(R.id.tvGoToLogin);
         rgRoles = findViewById(R.id.rgRoles);
@@ -54,18 +55,19 @@ public class RegistrationActivity extends AppCompatActivity {
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (TextUtils.isEmpty(etRegisterName.getText()) || TextUtils.isEmpty(etRegisterEmail.getText()) || TextUtils.isEmpty(etRegisterPassword.getText())) {
+                if (TextUtils.isEmpty(etRegisterName.getText()) || TextUtils.isEmpty(etRegisterEmail.getText()) || TextUtils.isEmpty(etRegisterPassword.getText()) || TextUtils.isEmpty(etArea.getText())) {
                     Toast.makeText(RegistrationActivity.this, "All fields are required", Toast.LENGTH_SHORT).show();
                 } else {
                     String name = etRegisterName.getText().toString();
                     String email = etRegisterEmail.getText().toString();
                     String password = etRegisterPassword.getText().toString();
+                    String area = etArea.getText().toString();
                     String role = "user";
                     int checkedId = rgRoles.getCheckedRadioButtonId();
                     if (checkedId == R.id.rbServiceProvider) {
                         role = "service";
                     }
-                    User user = new User(name, email, password, role);
+                    User user = new User(name, email, password, role, area);
                     userViewModel.insert(user);
                     Toast.makeText(RegistrationActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(RegistrationActivity.this, LoginActivity.class));
