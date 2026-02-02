@@ -3,6 +3,7 @@ package com.example.localconnect.worker;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
@@ -21,13 +22,17 @@ public class NoticeWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        // Here we would check the database for any scheduled notices that match the
-        // current time
-        // For demonstration, we'll just send a general notification if triggered
+        try {
+            SharedPreferences prefs = getApplicationContext().getSharedPreferences("local_connect_prefs",
+                    Context.MODE_PRIVATE);
+            // Updating check time
+            prefs.edit().putLong("last_notice_check_time", System.currentTimeMillis()).apply();
 
-        sendNotification("LocalConnect", "Checking for new notices in your area...");
-
-        return Result.success();
+            sendNotification("LocalConnect", "Check latest community announcements!");
+            return Result.success();
+        } catch (Exception e) {
+            return Result.failure();
+        }
     }
 
     private void sendNotification(String title, String message) {
@@ -45,7 +50,8 @@ public class NoticeWorker extends Worker {
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(title)
                 .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true);
 
         notificationManager.notify(1, builder.build());
     }

@@ -11,9 +11,12 @@ public class User {
     public String phone;
     public String pincode;
 
-    public User(String name, String phone, String pincode) {
+    public String password;
+
+    public User(String name, String phone, String pincode, String password) {
         this.name = name;
         this.phone = phone;
         this.pincode = pincode;
+        this.password = password;
     }
 }

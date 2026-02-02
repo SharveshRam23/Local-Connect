@@ -14,11 +14,14 @@ public class ServiceProvider {
     public boolean isApproved;
     public boolean isAvailable;
 
-    public ServiceProvider(String name, String category, String pincode, String phone) {
+    public String password;
+
+    public ServiceProvider(String name, String category, String pincode, String phone, String password) {
         this.name = name;
         this.category = category;
         this.pincode = pincode;
         this.phone = phone;
+        this.password = password;
         this.isApproved = false; // Default false
         this.isAvailable = true; // Default true
     }

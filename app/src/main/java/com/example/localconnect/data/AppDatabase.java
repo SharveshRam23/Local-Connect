@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Database(entities = { User.class, ServiceProvider.class, Notice.class,
-        Issue.class }, version = 1, exportSchema = false)
+        Issue.class }, version = 2, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UserDao userDao();
@@ -40,6 +40,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                             AppDatabase.class, "local_connect_database")
+                            .fallbackToDestructiveMigration()
                             .build();
                 }
             }
