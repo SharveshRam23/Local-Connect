@@ -6,46 +6,40 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "notices")
 public class Notice {
     @PrimaryKey(autoGenerate = true)
-    private int id;
+    private int noticeId;
     private String title;
-    private String description;
-    private String type; // GLOBAL, AREA
-    private String pincode; // For AREA type notices
-    private long scheduledTime;
+    private String message;
+    private String area;
+    private long timestamp;
 
-    public Notice(String title, String description, String type, String pincode, long scheduledTime) {
+    public Notice(String title, String message, String area, long timestamp) {
         this.title = title;
-        this.description = description;
-        this.type = type;
-        this.pincode = pincode;
-        this.scheduledTime = scheduledTime;
+        this.message = message;
+        this.area = area;
+        this.timestamp = timestamp;
     }
 
-    public int getId() {
-        return id;
+    public int getNoticeId() {
+        return noticeId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setNoticeId(int noticeId) {
+        this.noticeId = noticeId;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public String getDescription() {
-        return description;
+    public String getMessage() {
+        return message;
     }
 
-    public String getType() {
-        return type;
+    public String getArea() {
+        return area;
     }
 
-    public String getPincode() {
-        return pincode;
-    }
-
-    public long getScheduledTime() {
-        return scheduledTime;
+    public long getTimestamp() {
+        return timestamp;
     }
 }

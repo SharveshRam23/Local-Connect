@@ -11,12 +11,14 @@ public class User {
     private String email;
     private String password;
     private String role;
+    private String area;
 
-    public User(String name, String email, String password, String role) {
+    public User(String name, String email, String password, String role, String area) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.area = area;
     }
 
     public int getId() {
@@ -41,5 +43,9 @@ public class User {
 
     public String getRole() {
         return role;
+    }
+
+    public String getArea() {
+        return area;
     }
 }

@@ -1,65 +1,50 @@
 package com.example.localconnect.model;
 
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "service_providers")
+@Entity(tableName = "service_providers",
+        foreignKeys = @ForeignKey(entity = User.class,
+                                  parentColumns = "id",
+                                  childColumns = "userId",
+                                  onDelete = ForeignKey.CASCADE))
 public class ServiceProvider {
     @PrimaryKey(autoGenerate = true)
-    private int id;
-    private String name;
-    private String category;
-    private String contact;
-    private String address;
-    private boolean isApproved;
-    private boolean isAvailable;
+    private int providerId;
+    private int userId;
+    private String serviceType;
+    private String phone;
+    private String area;
 
-    public ServiceProvider(String name, String category, String contact, String address, boolean isApproved) {
-        this.name = name;
-        this.category = category;
-        this.contact = contact;
-        this.address = address;
-        this.isApproved = isApproved;
-        this.isAvailable = false;
+    public ServiceProvider(int userId, String serviceType, String phone, String area) {
+        this.userId = userId;
+        this.serviceType = serviceType;
+        this.phone = phone;
+        this.area = area;
     }
 
-    public int getId() {
-        return id;
+    public int getProviderId() {
+        return providerId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setProviderId(int providerId) {
+        this.providerId = providerId;
     }
 
-    public String getName() {
-        return name;
+    public int getUserId() {
+        return userId;
     }
 
-    public String getCategory() {
-        return category;
+    public String getServiceType() {
+        return serviceType;
     }
 
-    public String getContact() {
-        return contact;
+    public String getPhone() {
+        return phone;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public boolean isApproved() {
-        return isApproved;
-    }
-
-    public void setApproved(boolean approved) {
-        isApproved = approved;
-    }
-
-    public boolean isAvailable() {
-        return isAvailable;
-    }
-
-    public void setAvailable(boolean available) {
-        isAvailable = available;
+    public String getArea() {
+        return area;
     }
 }

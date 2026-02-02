@@ -1,12 +1,16 @@
 package com.example.localconnect.data;
 
 import android.app.Application;
-import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
 import com.example.localconnect.data.dao.UserDao;
 import com.example.localconnect.model.User;
+
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class UserRepository {
 
@@ -18,25 +22,22 @@ public class UserRepository {
     }
 
     public void insert(User user) {
-        new insertAsyncTask(userDao).execute(user);
+        AppDatabase.databaseWriteExecutor.execute(() -> userDao.insert(user));
     }
 
     public LiveData<User> getUser(String email, String password) {
         return userDao.getUser(email, password);
     }
 
-    private static class insertAsyncTask extends AsyncTask<User, Void, Void> {
+    public User findByEmail(String email) throws ExecutionException, InterruptedException {
+        Callable<User> callable = () -> userDao.findByEmail(email);
+        Future<User> future = AppDatabase.databaseWriteExecutor.submit(callable);
+        return future.get();
+    }
 
-        private UserDao mAsyncTaskDao;
-
-        insertAsyncTask(UserDao dao) {
-            mAsyncTaskDao = dao;
-        }
-
-        @Override
-        protected Void doInBackground(final User... params) {
-            mAsyncTaskDao.insert(params[0]);
-            return null;
-        }
+    public List<User> getUsersInArea(String area) throws ExecutionException, InterruptedException {
+        Callable<List<User>> callable = () -> userDao.getUsersInArea(area);
+        Future<List<User>> future = AppDatabase.databaseWriteExecutor.submit(callable);
+        return future.get();
     }
 }

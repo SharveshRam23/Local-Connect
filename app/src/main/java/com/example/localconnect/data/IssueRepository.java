@@ -1,7 +1,6 @@
 package com.example.localconnect.data;
 
 import android.app.Application;
-import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
@@ -13,34 +12,33 @@ import java.util.List;
 public class IssueRepository {
 
     private IssueDao issueDao;
-    private LiveData<List<Issue>> allIssues;
 
     public IssueRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
         issueDao = db.issueDao();
-        allIssues = issueDao.getAllIssues();
-    }
-
-    public LiveData<List<Issue>> getAllIssues() {
-        return allIssues;
     }
 
     public void insert(Issue issue) {
-        new insertAsyncTask(issueDao).execute(issue);
+        AppDatabase.databaseWriteExecutor.execute(() -> issueDao.insert(issue));
     }
 
-    private static class insertAsyncTask extends AsyncTask<Issue, Void, Void> {
+    public void update(Issue issue) {
+        AppDatabase.databaseWriteExecutor.execute(() -> issueDao.update(issue));
+    }
 
-        private IssueDao mAsyncTaskDao;
+    public void delete(Issue issue) {
+        AppDatabase.databaseWriteExecutor.execute(() -> issueDao.delete(issue));
+    }
 
-        insertAsyncTask(IssueDao dao) {
-            mAsyncTaskDao = dao;
-        }
+    public LiveData<Issue> getIssueById(int issueId) {
+        return issueDao.getIssueById(issueId);
+    }
 
-        @Override
-        protected Void doInBackground(final Issue... params) {
-            mAsyncTaskDao.insert(params[0]);
-            return null;
-        }
+    public LiveData<List<Issue>> getIssuesByArea(String area) {
+        return issueDao.getIssuesByArea(area);
+    }
+
+    public LiveData<List<Issue>> getIssuesByAreaAndStatus(String area, String status) {
+        return issueDao.getIssuesByAreaAndStatus(area, status);
     }
 }

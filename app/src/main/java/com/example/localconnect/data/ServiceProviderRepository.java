@@ -4,50 +4,34 @@ import android.app.Application;
 
 import androidx.lifecycle.LiveData;
 
-import com.example.localconnect.data.dao.ProviderDao;
+import com.example.localconnect.data.dao.ServiceProviderDao;
 import com.example.localconnect.model.ServiceProvider;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class ServiceProviderRepository {
-    private ProviderDao mProviderDao;
-    private LiveData<List<ServiceProvider>> mAllProviders;
-    private LiveData<List<ServiceProvider>> mPendingProviders;
-    private LiveData<List<ServiceProvider>> mApprovedProviders;
-    private final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(4);
 
+    private ServiceProviderDao serviceProviderDao;
 
     public ServiceProviderRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
-        mProviderDao = db.providerDao();
-        mAllProviders = mProviderDao.getAllServiceProviders();
-        mPendingProviders = mProviderDao.getPendingServiceProviders();
-        mApprovedProviders = mProviderDao.getApprovedServiceProviders();
-    }
-
-    public LiveData<List<ServiceProvider>> getAllServiceProviders() {
-        return mAllProviders;
-    }
-
-    public LiveData<List<ServiceProvider>> getPendingProviders() {
-        return mPendingProviders;
-    }
-
-    public LiveData<List<ServiceProvider>> getApprovedProviders() {
-        return mApprovedProviders;
+        serviceProviderDao = db.serviceProviderDao();
     }
 
     public void insert(ServiceProvider serviceProvider) {
-        databaseWriteExecutor.execute(() -> {
-            mProviderDao.insert(serviceProvider);
-        });
+        AppDatabase.databaseWriteExecutor.execute(() -> serviceProviderDao.insert(serviceProvider));
     }
 
-    public void update(ServiceProvider serviceProvider) {
-        databaseWriteExecutor.execute(() -> {
-            mProviderDao.update(serviceProvider);
-        });
+    public LiveData<List<ServiceProvider>> getServiceProvidersByArea(String area) {
+        return serviceProviderDao.getServiceProvidersByArea(area);
+    }
+
+    public ServiceProvider getServiceProviderByUserId(int userId) throws ExecutionException, InterruptedException {
+        Callable<ServiceProvider> callable = () -> serviceProviderDao.getServiceProviderByUserId(userId);
+        Future<ServiceProvider> future = AppDatabase.databaseWriteExecutor.submit(callable);
+        return future.get();
     }
 }

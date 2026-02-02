@@ -1,7 +1,6 @@
 package com.example.localconnect.data;
 
 import android.app.Application;
-import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
@@ -13,7 +12,6 @@ import java.util.List;
 public class NoticeRepository {
 
     private NoticeDao noticeDao;
-    private LiveData<List<Notice>> allNotices;
 
     public NoticeRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
@@ -21,21 +19,10 @@ public class NoticeRepository {
     }
 
     public void insert(Notice notice) {
-        new insertAsyncTask(noticeDao).execute(notice);
+        AppDatabase.databaseWriteExecutor.execute(() -> noticeDao.insert(notice));
     }
 
-    private static class insertAsyncTask extends AsyncTask<Notice, Void, Void> {
-
-        private NoticeDao mAsyncTaskDao;
-
-        insertAsyncTask(NoticeDao dao) {
-            mAsyncTaskDao = dao;
-        }
-
-        @Override
-        protected Void doInBackground(final Notice... params) {
-            mAsyncTaskDao.insert(params[0]);
-            return null;
-        }
+    public LiveData<List<Notice>> getNoticesByArea(String area) {
+        return noticeDao.getNoticesByArea(area);
     }
 }
