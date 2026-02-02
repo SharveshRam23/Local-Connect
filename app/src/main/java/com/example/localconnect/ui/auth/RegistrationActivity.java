@@ -48,6 +48,7 @@ public class RegistrationActivity extends AppCompatActivity {
                     User user = new User(name, email, password, "user");
                     userViewModel.insert(user);
                     Toast.makeText(RegistrationActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(RegistrationActivity.this, LoginActivity.class));
                     finish();
                 }
             }
