@@ -20,7 +20,7 @@ import com.example.localconnect.model.User;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Database(entities = {User.class, ServiceProvider.class, Notice.class, Issue.class}, version = 3)
+@Database(entities = {User.class, ServiceProvider.class, Notice.class, Issue.class}, version = 4, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase instance;
@@ -54,6 +54,15 @@ public abstract class AppDatabase extends RoomDatabase {
                 userDao.insert(admin);
                 User user = new User("user", "user@localconnect.com", "user123", "user");
                 userDao.insert(user);
+                User service = new User("service", "service@localconnect.com", "service123", "service");
+                userDao.insert(service);
+
+                ProviderDao providerDao = instance.providerDao();
+                providerDao.deleteAll();
+                ServiceProvider serviceProvider = new ServiceProvider("Plumber", "Plumbing", "123-456-7890", "123 Main St", true);
+                providerDao.insert(serviceProvider);
+
+
             });
         }
     };
