@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localconnect.MainActivity;
 import com.example.localconnect.R;
-import com.example.localconnect.admin.AdminHomeActivity;
+import com.example.localconnect.ui.fragments.admin.AdminHomeActivity;
 import com.example.localconnect.model.User;
 import com.example.localconnect.viewmodel.UserViewModel;
 

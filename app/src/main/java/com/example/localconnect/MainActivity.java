@@ -10,10 +10,10 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.example.localconnect.ui.auth.LoginActivity;
-import com.example.localconnect.ui.issue.ReportIssueActivity;
-import com.example.localconnect.ui.provider.ProviderDashboardActivity;
-import com.example.localconnect.ui.user.ServiceListActivity;
-import com.example.localconnect.worker.NoticeWorker;
+import com.example.localconnect.ui.fragments.issues.ReportIssueActivity;
+import com.example.localconnect.ui.fragments.provider.ProviderDashboardActivity;
+import com.example.localconnect.ui.fragments.user.ServiceListActivity;
+import com.example.localconnect.workers.NoticeWorker;
 
 import java.util.concurrent.TimeUnit;
 

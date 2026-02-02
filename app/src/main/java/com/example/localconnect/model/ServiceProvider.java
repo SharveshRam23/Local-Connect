@@ -10,13 +10,17 @@ public class ServiceProvider {
     private String name;
     private String category;
     private String contact;
+    private String address;
     private boolean isApproved;
+    private boolean isAvailable;
 
-    public ServiceProvider(String name, String category, String contact, boolean isApproved) {
+    public ServiceProvider(String name, String category, String contact, String address, boolean isApproved) {
         this.name = name;
         this.category = category;
         this.contact = contact;
+        this.address = address;
         this.isApproved = isApproved;
+        this.isAvailable = false;
     }
 
     public int getId() {
@@ -39,11 +43,23 @@ public class ServiceProvider {
         return contact;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
     public boolean isApproved() {
         return isApproved;
     }
 
     public void setApproved(boolean approved) {
         isApproved = approved;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(boolean available) {
+        isAvailable = available;
     }
 }

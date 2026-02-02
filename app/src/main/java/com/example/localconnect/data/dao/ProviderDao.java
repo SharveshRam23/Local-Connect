@@ -26,10 +26,10 @@ public interface ProviderDao {
     @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1 AND category = :category")
     List<ServiceProvider> getProvidersByCategory(String category);
 
-    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1 AND pincode = :pincode")
+    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1 AND address LIKE '%' || :pincode || '%'")
     List<ServiceProvider> getProvidersByPincode(String pincode);
 
-    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1 AND category = :category AND pincode = :pincode")
+    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1 AND category = :category AND address LIKE '%' || :pincode || '%'")
     List<ServiceProvider> getProvidersByCategoryAndPincode(String category, String pincode);
 
     @Query("SELECT * FROM service_providers WHERE isApproved = 0")

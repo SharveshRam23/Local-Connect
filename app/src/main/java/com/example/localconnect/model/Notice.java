@@ -9,10 +9,16 @@ public class Notice {
     private int id;
     private String title;
     private String description;
+    private String type;
+    private String pincode;
+    private long scheduledTime;
 
-    public Notice(String title, String description) {
+    public Notice(String title, String description, String type, String pincode, long scheduledTime) {
         this.title = title;
         this.description = description;
+        this.type = type;
+        this.pincode = pincode;
+        this.scheduledTime = scheduledTime;
     }
 
     public int getId() {
@@ -29,5 +35,17 @@ public class Notice {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getPincode() {
+        return pincode;
+    }
+
+    public long getScheduledTime() {
+        return scheduledTime;
     }
 }
