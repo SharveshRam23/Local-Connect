@@ -2,13 +2,15 @@ package com.example.localconnect.model;
 
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "service_providers",
         foreignKeys = @ForeignKey(entity = User.class,
                                   parentColumns = "id",
                                   childColumns = "userId",
-                                  onDelete = ForeignKey.CASCADE))
+                                  onDelete = ForeignKey.CASCADE),
+        indices = {@Index("userId")})
 public class ServiceProvider {
     @PrimaryKey(autoGenerate = true)
     private int providerId;
