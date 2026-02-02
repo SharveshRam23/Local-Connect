@@ -9,8 +9,8 @@ public class Notice {
     private int id;
     private String title;
     private String description;
-    private String type;
-    private String pincode;
+    private String type; // GLOBAL, AREA
+    private String pincode; // For AREA type notices
     private long scheduledTime;
 
     public Notice(String title, String description, String type, String pincode, long scheduledTime) {

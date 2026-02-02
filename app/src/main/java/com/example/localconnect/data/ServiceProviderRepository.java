@@ -1,71 +1,55 @@
-package com.example.localconnect.data;
+package com.example.localconnect.ui.user;
 
-import android.app.Application;
-import android.os.AsyncTask;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
-import androidx.lifecycle.LiveData;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.localconnect.data.dao.ServiceProviderDao;
+import com.example.localconnect.R;
 import com.example.localconnect.model.ServiceProvider;
 
 import java.util.List;
 
-public class ServiceProviderRepository {
+public class ServiceProviderAdapter extends RecyclerView.Adapter<ServiceProviderAdapter.ServiceProviderViewHolder> {
 
-    private ServiceProviderDao serviceProviderDao;
-    private LiveData<List<ServiceProvider>> pendingProviders;
-    private LiveData<List<ServiceProvider>> approvedProviders;
+    private List<ServiceProvider> serviceProviders;
 
-    public ServiceProviderRepository(Application application) {
-        AppDatabase db = AppDatabase.getDatabase(application);
-        serviceProviderDao = db.serviceProviderDao();
-        pendingProviders = serviceProviderDao.getPendingProviders();
-        approvedProviders = serviceProviderDao.getApprovedProviders();
+    public ServiceProviderAdapter(List<ServiceProvider> serviceProviders) {
+        this.serviceProviders = serviceProviders;
     }
 
-    public LiveData<List<ServiceProvider>> getPendingProviders() {
-        return pendingProviders;
+    @NonNull
+    @Override
+    public ServiceProviderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_service_provider, parent, false);
+        return new ServiceProviderViewHolder(itemView);
     }
 
-    public LiveData<List<ServiceProvider>> getApprovedProviders() {
-        return approvedProviders;
+    @Override
+    public void onBindViewHolder(@NonNull ServiceProviderViewHolder holder, int position) {
+        ServiceProvider serviceProvider = serviceProviders.get(position);
+        holder.tvProviderName.setText(serviceProvider.getName());
+        holder.tvProviderService.setText(serviceProvider.getCategory());
+        holder.tvProviderLocation.setText(serviceProvider.getAddress());
     }
 
-    public void insert(ServiceProvider serviceProvider) {
-        new insertAsyncTask(serviceProviderDao).execute(serviceProvider);
+    @Override
+    public int getItemCount() {
+        return serviceProviders.size();
     }
 
-    public void update(ServiceProvider serviceProvider) {
-        new updateAsyncTask(serviceProviderDao).execute(serviceProvider);
-    }
+    static class ServiceProviderViewHolder extends RecyclerView.ViewHolder {
+        private TextView tvProviderName, tvProviderService, tvProviderLocation;
 
-    private static class insertAsyncTask extends AsyncTask<ServiceProvider, Void, Void> {
-
-        private ServiceProviderDao mAsyncTaskDao;
-
-        insertAsyncTask(ServiceProviderDao dao) {
-            mAsyncTaskDao = dao;
-        }
-
-        @Override
-        protected Void doInBackground(final ServiceProvider... params) {
-            mAsyncTaskDao.insert(params[0]);
-            return null;
-        }
-    }
-
-    private static class updateAsyncTask extends AsyncTask<ServiceProvider, Void, Void> {
-
-        private ServiceProviderDao mAsyncTaskDao;
-
-        updateAsyncTask(ServiceProviderDao dao) {
-            mAsyncTaskDao = dao;
-        }
-
-        @Override
-        protected Void doInBackground(final ServiceProvider... params) {
-            mAsyncTaskDao.update(params[0]);
-            return null;
+        public ServiceProviderViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvProviderName = itemView.findViewById(R.id.tvProviderName);
+            tvProviderService = itemView.findViewById(R.id.tvProviderService);
+            tvProviderLocation = itemView.findViewById(R.id.tvProviderLocation);
         }
     }
 }

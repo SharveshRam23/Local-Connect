@@ -11,9 +11,9 @@ public interface UserDao {
     @Insert
     void insert(User user);
 
-    @Query("SELECT * FROM users WHERE phone = :phone LIMIT 1")
-    User getUserByPhone(String phone);
+    @Query("SELECT * FROM users WHERE email = :email AND password = :password")
+    User getUser(String email, String password);
 
-    @Query("SELECT * FROM users LIMIT 1")
-    User getAnyUser(); // To check if user is logged in/registered
+    @Query("DELETE FROM users")
+    void deleteAll();
 }

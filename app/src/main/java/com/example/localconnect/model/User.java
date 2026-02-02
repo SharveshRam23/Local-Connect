@@ -6,14 +6,40 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "users")
 public class User {
     @PrimaryKey(autoGenerate = true)
-    public int id;
-    public String name;
-    public String phone;
-    public String pincode;
+    private int id;
+    private String name;
+    private String email;
+    private String password;
+    private String role;
 
-    public User(String name, String phone, String pincode) {
+    public User(String name, String email, String password, String role) {
         this.name = name;
-        this.phone = phone;
-        this.pincode = pincode;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getRole() {
+        return role;
     }
 }
