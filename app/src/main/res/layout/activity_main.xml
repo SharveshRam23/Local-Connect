@@ -7,35 +7,42 @@
     android:padding="32dp">
 
     <TextView
+        android:id="@+id/tvWelcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="LocalConnect"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="48dp"
-        android:textColor="@color/design_default_color_primary"/>
+        android:text="Welcome"
+        android:textSize="24sp"
+        android:layout_marginBottom="48dp"/>
 
     <Button
-        android:id="@+id/btnUserMode"
+        android:id="@+id/btnFindServices"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="User Mode"
+        android:text="Find Services"
         android:textSize="18sp"
         android:layout_marginBottom="16dp"/>
 
     <Button
-        android:id="@+id/btnProviderMode"
+        android:id="@+id/btnReportIssue"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="Service Provider Mode"
+        android:text="Report an Issue"
         android:textSize="18sp"
         android:layout_marginBottom="16dp"/>
 
     <Button
-        android:id="@+id/btnAdminMode"
+        android:id="@+id/btnProviderDashboard"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="Admin Mode"
-        android:textSize="18sp"/>
+        android:text="Provider Dashboard"
+        android:textSize="18sp"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Logout"
+        android:layout_marginTop="32dp"/>
 
 </LinearLayout>

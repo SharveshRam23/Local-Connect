@@ -16,4 +16,7 @@ public interface IssueDao {
 
     @Query("SELECT * FROM issues")
     LiveData<List<Issue>> getAllIssues();
+
+    @Query("DELETE FROM issues")
+    void deleteAll();
 }

@@ -17,6 +17,9 @@ public interface ProviderDao {
     @Update
     void update(ServiceProvider provider);
 
+    @Query("DELETE FROM service_providers")
+    void deleteAll();
+
     @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1")
     List<ServiceProvider> getAllApprovedProviders();
 

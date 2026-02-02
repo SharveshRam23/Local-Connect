@@ -3,14 +3,16 @@ package com.example.localconnect;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import com.example.localconnect.ui.admin.AdminLoginActivity;
-import com.example.localconnect.ui.provider.ProviderRegistrationActivity;
-import com.example.localconnect.ui.user.UserRegistrationActivity;
+import com.example.localconnect.ui.auth.LoginActivity;
+import com.example.localconnect.ui.issue.ReportIssueActivity;
+import com.example.localconnect.ui.provider.ProviderDashboardActivity;
+import com.example.localconnect.ui.user.ServiceListActivity;
 import com.example.localconnect.worker.NoticeWorker;
 
 import java.util.concurrent.TimeUnit;
@@ -22,13 +24,25 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button btnUserMode = findViewById(R.id.btnUserMode);
-        Button btnProviderMode = findViewById(R.id.btnProviderMode);
-        Button btnAdminMode = findViewById(R.id.btnAdminMode);
+        TextView tvWelcome = findViewById(R.id.tvWelcome);
+        Button btnFindServices = findViewById(R.id.btnFindServices);
+        Button btnReportIssue = findViewById(R.id.btnReportIssue);
+        Button btnProviderDashboard = findViewById(R.id.btnProviderDashboard);
+        Button btnLogout = findViewById(R.id.btnLogout);
 
-        btnUserMode.setOnClickListener(v -> startActivity(new Intent(this, UserRegistrationActivity.class)));
-        btnProviderMode.setOnClickListener(v -> startActivity(new Intent(this, ProviderRegistrationActivity.class)));
-        btnAdminMode.setOnClickListener(v -> startActivity(new Intent(this, AdminLoginActivity.class)));
+        String userName = getIntent().getStringExtra("user_name");
+        if (userName != null) {
+            tvWelcome.setText("Welcome, " + userName);
+        }
+
+        btnFindServices.setOnClickListener(v -> startActivity(new Intent(this, ServiceListActivity.class)));
+        btnReportIssue.setOnClickListener(v -> startActivity(new Intent(this, ReportIssueActivity.class)));
+        btnProviderDashboard.setOnClickListener(v -> startActivity(new Intent(this, ProviderDashboardActivity.class)));
+
+        btnLogout.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        });
 
         // Schedule Worker
         PeriodicWorkRequest noticeWorkRequest = new PeriodicWorkRequest.Builder(NoticeWorker.class, 15,
