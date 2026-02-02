@@ -1,7 +1,6 @@
 package com.example.localconnect.ui.auth;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -11,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localconnect.MainActivity;
@@ -46,7 +46,24 @@ public class LoginActivity extends AppCompatActivity {
                 } else {
                     String email = etLoginEmail.getText().toString();
                     String password = etLoginPassword.getText().toString();
-                    new GetUserAsyncTask().execute(email, password);
+                    userViewModel.getUser(email, password).observe(LoginActivity.this, new Observer<User>() {
+                        @Override
+                        public void onChanged(User user) {
+                            if (user != null) {
+                                Intent intent;
+                                if (user.getRole().equals("admin")) {
+                                    intent = new Intent(LoginActivity.this, AdminHomeActivity.class);
+                                } else {
+                                    intent = new Intent(LoginActivity.this, MainActivity.class);
+                                }
+                                intent.putExtra("user_name", user.getName());
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
                 }
             }
         });
@@ -57,30 +74,5 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(LoginActivity.this, RegistrationActivity.class));
             }
         });
-    }
-
-    private class GetUserAsyncTask extends AsyncTask<String, Void, User> {
-        @Override
-        protected User doInBackground(String... strings) {
-            return userViewModel.getUser(strings[0], strings[1]);
-        }
-
-        @Override
-        protected void onPostExecute(User user) {
-            super.onPostExecute(user);
-            if (user != null) {
-                Intent intent;
-                if (user.getRole().equals("admin")) {
-                    intent = new Intent(LoginActivity.this, AdminHomeActivity.class);
-                } else {
-                    intent = new Intent(LoginActivity.this, MainActivity.class);
-                }
-                intent.putExtra("user_name", user.getName());
-                startActivity(intent);
-                finish();
-            } else {
-                Toast.makeText(LoginActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 }

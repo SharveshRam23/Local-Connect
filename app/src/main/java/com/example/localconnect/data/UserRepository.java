@@ -3,6 +3,8 @@ package com.example.localconnect.data;
 import android.app.Application;
 import android.os.AsyncTask;
 
+import androidx.lifecycle.LiveData;
+
 import com.example.localconnect.data.dao.UserDao;
 import com.example.localconnect.model.User;
 
@@ -19,7 +21,7 @@ public class UserRepository {
         new insertAsyncTask(userDao).execute(user);
     }
 
-    public User getUser(String email, String password) {
+    public LiveData<User> getUser(String email, String password) {
         return userDao.getUser(email, password);
     }
 
