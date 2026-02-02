@@ -10,10 +10,10 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.example.localconnect.ui.auth.LoginActivity;
-import com.example.localconnect.ui.fragments.issues.ReportIssueActivity;
-import com.example.localconnect.ui.fragments.provider.ProviderDashboardActivity;
-import com.example.localconnect.ui.fragments.user.ServiceListActivity;
-import com.example.localconnect.workers.NoticeWorker;
+import com.example.localconnect.ui.issue.ReportIssueActivity;
+import com.example.localconnect.ui.admin.AdminHomeActivity;
+import com.example.localconnect.ui.user.HomeActivity;
+import com.example.localconnect.worker.NoticeWorker;
 
 import java.util.concurrent.TimeUnit;
 
@@ -35,9 +35,9 @@ public class MainActivity extends AppCompatActivity {
             tvWelcome.setText("Welcome, " + userName);
         }
 
-        btnFindServices.setOnClickListener(v -> startActivity(new Intent(this, ServiceListActivity.class)));
+        btnFindServices.setOnClickListener(v -> startActivity(new Intent(this, HomeActivity.class)));
         btnReportIssue.setOnClickListener(v -> startActivity(new Intent(this, ReportIssueActivity.class)));
-        btnProviderDashboard.setOnClickListener(v -> startActivity(new Intent(this, ProviderDashboardActivity.class)));
+        btnProviderDashboard.setOnClickListener(v -> startActivity(new Intent(this, AdminHomeActivity.class)));
 
         btnLogout.setOnClickListener(v -> {
             startActivity(new Intent(this, LoginActivity.class));
