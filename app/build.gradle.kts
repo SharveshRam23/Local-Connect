@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -14,6 +15,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 
     buildTypes {
@@ -43,4 +48,6 @@ dependencies {
     implementation("androidx.work:work-runtime:2.9.0")
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
+    implementation(libs.hilt.android)
+    annotationProcessor(libs.hilt.compiler)
 }

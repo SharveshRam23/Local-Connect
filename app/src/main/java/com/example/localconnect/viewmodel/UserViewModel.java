@@ -1,20 +1,23 @@
 package com.example.localconnect.viewmodel;
 
-import android.app.Application;
-
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.example.localconnect.data.UserRepository;
 import com.example.localconnect.model.User;
 
-public class UserViewModel extends AndroidViewModel {
+import javax.inject.Inject;
 
-    private UserRepository mRepository;
+import dagger.hilt.android.lifecycle.HiltViewModel;
 
-    public UserViewModel (Application application) {
-        super(application);
-        mRepository = new UserRepository(application);
+@HiltViewModel
+public class UserViewModel extends ViewModel {
+
+    private final UserRepository mRepository;
+
+    @Inject
+    public UserViewModel(UserRepository repository) {
+        this.mRepository = repository;
     }
 
     public void insert(User user) {

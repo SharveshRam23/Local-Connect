@@ -1,24 +1,22 @@
 package com.example.localconnect.data;
 
-import android.app.Application;
-
-import androidx.lifecycle.LiveData;
-
 import com.example.localconnect.data.dao.UserDao;
 import com.example.localconnect.model.User;
 
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
+
+import javax.inject.Inject;
+
+import androidx.lifecycle.LiveData;
 
 public class UserRepository {
 
-    private UserDao userDao;
+    private final UserDao userDao;
 
-    public UserRepository(Application application) {
-        AppDatabase db = AppDatabase.getDatabase(application);
-        userDao = db.userDao();
+    @Inject
+    public UserRepository(UserDao userDao) {
+        this.userDao = userDao;
     }
 
     public void insert(User user) {
@@ -29,15 +27,11 @@ public class UserRepository {
         return userDao.getUser(email, password);
     }
 
-    public User findByEmail(String email) throws ExecutionException, InterruptedException {
-        Callable<User> callable = () -> userDao.findByEmail(email);
-        Future<User> future = AppDatabase.databaseWriteExecutor.submit(callable);
-        return future.get();
+    public CompletableFuture<User> findByEmail(String email) {
+        return CompletableFuture.supplyAsync(() -> userDao.findByEmail(email), AppDatabase.databaseWriteExecutor);
     }
 
-    public List<User> getUsersInArea(String area) throws ExecutionException, InterruptedException {
-        Callable<List<User>> callable = () -> userDao.getUsersInArea(area);
-        Future<List<User>> future = AppDatabase.databaseWriteExecutor.submit(callable);
-        return future.get();
+    public CompletableFuture<List<User>> getUsersInArea(String area) {
+        return CompletableFuture.supplyAsync(() -> userDao.getUsersInArea(area), AppDatabase.databaseWriteExecutor);
     }
 }
