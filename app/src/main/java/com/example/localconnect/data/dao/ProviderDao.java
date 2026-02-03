@@ -17,6 +17,9 @@ public interface ProviderDao {
     @Update
     void update(ServiceProvider provider);
 
+    @androidx.room.Delete
+    void delete(ServiceProvider provider);
+
     @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1")
     List<ServiceProvider> getAllApprovedProviders();
 
@@ -31,4 +34,13 @@ public interface ProviderDao {
 
     @Query("SELECT * FROM service_providers WHERE isApproved = 0")
     List<ServiceProvider> getPendingProviders(); // For Admin
+
+    @Query("UPDATE service_providers SET isApproved = :isApproved, approvalTime = :approvalTime WHERE id = :id")
+    void updateApprovalStatus(int id, boolean isApproved, long approvalTime);
+
+    @Query("SELECT * FROM service_providers WHERE phone = :phone AND password = :password")
+    ServiceProvider checkLogin(String phone, String password);
+
+    @Query("SELECT * FROM service_providers WHERE id = :id")
+    ServiceProvider getProviderById(int id);
 }

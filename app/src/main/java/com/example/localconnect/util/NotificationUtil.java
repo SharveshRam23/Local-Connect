@@ -11,37 +11,28 @@ import com.example.localconnect.R;
 
 public class NotificationUtil {
 
-    public static void showNotification(
-            Context context,
-            String title,
-            String message
-    ) {
+        private static final String CHANNEL_ID = "provider_approval_channel";
+        private static final String CHANNEL_NAME = "Provider Approvals";
+        private static final String CHANNEL_DESC = "Notifications for Service Provider Account Approval";
 
-        String channelId = "localconnect_channel";
+        public static void showApprovalNotification(Context context, String title, String message) {
+                NotificationManager notificationManager = (NotificationManager) context
+                                .getSystemService(Context.NOTIFICATION_SERVICE);
 
-        NotificationManager manager =
-                (NotificationManager)
-                        context.getSystemService(Context.NOTIFICATION_SERVICE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME,
+                                        NotificationManager.IMPORTANCE_DEFAULT);
+                        channel.setDescription(CHANNEL_DESC);
+                        notificationManager.createNotificationChannel(channel);
+                }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                                .setSmallIcon(android.R.drawable.ic_dialog_info) // using system icon for simplicity
+                                .setContentTitle(title)
+                                .setContentText(message)
+                                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                .setAutoCancel(true);
 
-            NotificationChannel channel =
-                    new NotificationChannel(
-                            channelId,
-                            "LocalConnect Alerts",
-                            NotificationManager.IMPORTANCE_HIGH
-                    );
-
-            manager.createNotificationChannel(channel);
+                notificationManager.notify(1001, builder.build());
         }
-
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context, channelId)
-                        .setSmallIcon(R.drawable.ic_launcher_foreground)
-                        .setContentTitle(title)
-                        .setContentText(message)
-                        .setAutoCancel(true);
-
-        manager.notify(1, builder.build());
-    }
 }

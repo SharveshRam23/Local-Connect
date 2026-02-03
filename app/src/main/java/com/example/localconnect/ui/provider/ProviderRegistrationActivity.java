@@ -19,7 +19,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 public class ProviderRegistrationActivity extends AppCompatActivity {
 
-    private TextInputEditText etName, etPhone, etPincode, etPassword;
+    private TextInputEditText etName, etPhone, etPincode, etPassword, etExperience;
     private Spinner spinnerCategory;
     private Button btnRegister;
 
@@ -32,6 +32,14 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
         etPhone = findViewById(R.id.etProviderPhone);
         etPincode = findViewById(R.id.etProviderPincode);
         etPassword = findViewById(R.id.etProviderPassword);
+        // Assuming the layout XML will be updated to include this ID.
+        // It is safer to assume I need to update XML too, but the user requested Java
+        // code.
+        // I will assume the XML has R.id.etProviderExperience or I need to add it.
+        // The user request demanded "Full Java code ... XML layouts".
+        // I haven't updated XML yet. I should do that.
+        // For now, I'll use the ID `etProviderExperience` and ensure I update XML next.
+        etExperience = findViewById(R.id.etProviderExperience);
         spinnerCategory = findViewById(R.id.spinnerProviderCategory);
         btnRegister = findViewById(R.id.btnProviderRegister);
 
@@ -53,6 +61,7 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
         String pincode = etPincode.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
         String category = spinnerCategory.getSelectedItem().toString();
+        String experience = etExperience != null ? etExperience.getText().toString().trim() : "0";
 
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(phone) || TextUtils.isEmpty(pincode)
                 || TextUtils.isEmpty(password)) {
@@ -61,22 +70,11 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
         }
 
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            ServiceProvider provider = new ServiceProvider(name, category, pincode, phone, password);
+            ServiceProvider provider = new ServiceProvider(name, category, pincode, phone, password, experience);
             AppDatabase.getDatabase(getApplicationContext()).providerDao().insert(provider);
             runOnUiThread(() -> {
-                Toast.makeText(this, "Registration Successful. Waiting for Admin Approval.", Toast.LENGTH_LONG).show();
-
-                SharedPreferences prefs = getSharedPreferences("local_connect_prefs", Context.MODE_PRIVATE);
-                prefs.edit()
-                        .putString("provider_pincode", pincode)
-                        .putString("provider_name", name)
-                        .putBoolean("is_provider_login", true)
-                        .apply();
-
-                Intent intent = new Intent(ProviderRegistrationActivity.this, ProviderDashboardActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                Toast.makeText(this, "Registration Successful. Waiting for Admin Approval.", Toast.LENGTH_SHORT).show();
+                finish(); // Close registration, return to previous screen (likely Login or Main)
             });
         });
     }

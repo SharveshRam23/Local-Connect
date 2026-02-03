@@ -22,4 +22,7 @@ public interface UserDao {
 
     @Query("SELECT phone FROM users")
     java.util.List<String> getAllUserPhones();
+
+    @Query("SELECT * FROM users")
+    java.util.List<User> getAllUsers();
 }

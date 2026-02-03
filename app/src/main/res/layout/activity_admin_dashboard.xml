@@ -21,6 +21,13 @@
         android:layout_marginBottom="16dp"/>
 
     <Button
+        android:id="@+id/btnViewUsers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Registered Users"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
         android:id="@+id/btnPostNotice"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

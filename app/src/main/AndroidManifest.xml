@@ -60,6 +60,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.provider.ProviderLoginActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.provider.ProviderDashboardActivity"
             android:exported="false" />
 
