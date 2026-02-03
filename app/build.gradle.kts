@@ -49,5 +49,5 @@ dependencies {
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
     implementation(libs.hilt.android)
-    annotationProcessor(libs.hilt.compiler)
+    annotationProcessor(libs.hilt.android.compiler)
 }
