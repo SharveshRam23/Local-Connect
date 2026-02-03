@@ -1,25 +1,32 @@
 package com.example.localconnect.viewmodel;
 
-import android.app.Application;
-
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.example.localconnect.data.NoticeRepository;
 import com.example.localconnect.model.Notice;
 
 import java.util.List;
 
-public class NoticeViewModel extends AndroidViewModel {
+import javax.inject.Inject;
 
-    private NoticeRepository mRepository;
+import dagger.hilt.android.lifecycle.HiltViewModel;
 
-    public NoticeViewModel (Application application) {
-        super(application);
-        mRepository = new NoticeRepository(application);
+@HiltViewModel
+public class NoticeViewModel extends ViewModel {
+
+    private final NoticeRepository mRepository;
+
+    @Inject
+    public NoticeViewModel(NoticeRepository repository) {
+        this.mRepository = repository;
     }
 
-    public LiveData<List<Notice>> getNoticesByArea(String area) { return mRepository.getNoticesByArea(area); }
+    public LiveData<List<Notice>> getNoticesByArea(String area) {
+        return mRepository.getNoticesByArea(area);
+    }
 
-    public void insert(Notice notice) { mRepository.insert(notice); }
+    public void insert(Notice notice) {
+        mRepository.insert(notice);
+    }
 }

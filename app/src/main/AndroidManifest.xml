@@ -34,7 +34,6 @@
             android:name=".ui.auth.RegistrationActivity"
             android:exported="false" />
 
-
         <!-- Main Screen -->
         <activity
             android:name=".MainActivity"
@@ -51,31 +50,24 @@
             android:exported="false" />
 
         <activity
-            android:name=".ui.user.UserHomeActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ui.user.ServiceListActivity"
-            android:exported="false" />
-
-        <!-- Provider Activities -->
-        <activity
-            android:name=".ui.provider.ProviderRegistrationActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ui.provider.ProviderDashboardActivity"
+            android:name=".ui.user.HomeActivity"
             android:exported="false" />
 
         <!-- Admin Activities -->
         <activity
-            android:name=".ui.admin.AdminLoginActivity"
+            android:name=".ui.admin.AdminHomeActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ui.admin.AdminDashboardActivity"
+            android:name=".ui.admin.AddNoticeActivity"
             android:exported="false" />
 
-    </application>
+        <activity
+            android:name=".ui.admin.ViewIssuesActivity"
+            android:exported="false" />
 
+        <activity
+            android:name=".ui.admin.ViewPendingRequestsActivity"
+            android:exported="false" />
+    </application>
 </manifest>

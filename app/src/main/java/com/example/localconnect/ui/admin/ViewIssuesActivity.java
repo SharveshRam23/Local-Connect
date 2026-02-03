@@ -1,42 +1,36 @@
 package com.example.localconnect.ui.admin;
 
-
-
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.localconnect.R;
-import com.example.localconnect.model.Issue;
+import com.example.localconnect.databinding.ActivityViewIssuesBinding;
 import com.example.localconnect.viewmodel.IssueViewModel;
 
 import java.util.ArrayList;
-import java.util.List;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ViewIssuesActivity extends AppCompatActivity {
 
+    private ActivityViewIssuesBinding binding;
     private IssueViewModel issueViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_view_issues);
+        binding = ActivityViewIssuesBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        RecyclerView rvIssues = findViewById(R.id.rvIssues);
-        rvIssues.setLayoutManager(new LinearLayoutManager(this));
+        binding.rvIssues.setLayoutManager(new LinearLayoutManager(this));
 
-        // Dummy data for now
-        List<Issue> issues = new ArrayList<>();
-
-        IssueAdapter adapter = new IssueAdapter(issues);
-        rvIssues.setAdapter(adapter);
+        IssueAdapter adapter = new IssueAdapter(new ArrayList<>());
+        binding.rvIssues.setAdapter(adapter);
 
         issueViewModel = new ViewModelProvider(this).get(IssueViewModel.class);
-        issueViewModel.getIssuesByArea("dummy").observe(this, issueList -> {
-            adapter.setIssues(issueList);
-        });
+        issueViewModel.getIssuesByArea("dummy").observe(this, adapter::setIssues);
     }
 }

@@ -1,23 +1,22 @@
 package com.example.localconnect.data;
 
-import android.app.Application;
-
-import androidx.lifecycle.LiveData;
-
 import com.example.localconnect.data.dao.IssueDao;
 import com.example.localconnect.model.Issue;
 
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
+
+import javax.inject.Inject;
+
+import androidx.lifecycle.LiveData;
 
 public class IssueRepository {
 
-    private IssueDao issueDao;
+    private final IssueDao issueDao;
 
-    public IssueRepository(Application application) {
-        AppDatabase db = AppDatabase.getDatabase(application);
-        issueDao = db.issueDao();
+    @Inject
+    public IssueRepository(IssueDao issueDao) {
+        this.issueDao = issueDao;
     }
 
     public void insert(Issue issue) {
@@ -32,10 +31,8 @@ public class IssueRepository {
         AppDatabase.databaseWriteExecutor.execute(() -> issueDao.delete(issue));
     }
 
-    public Issue getIssueById(int issueId) throws Exception {
-        Callable<Issue> callable = () -> issueDao.getIssueById(issueId);
-        Future<Issue> future = AppDatabase.databaseWriteExecutor.submit(callable);
-        return future.get();
+    public CompletableFuture<Issue> getIssueById(int issueId) {
+        return CompletableFuture.supplyAsync(() -> issueDao.getIssueById(issueId), AppDatabase.databaseWriteExecutor);
     }
 
     public LiveData<List<Issue>> getIssuesByArea(String area) {

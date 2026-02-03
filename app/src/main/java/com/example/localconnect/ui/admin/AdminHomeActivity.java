@@ -1,46 +1,35 @@
-
 package com.example.localconnect.ui.admin;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.localconnect.R;
+import com.example.localconnect.databinding.ActivityAdminHomeBinding;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class AdminHomeActivity extends AppCompatActivity {
+
+    private ActivityAdminHomeBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin_home);
+        binding = ActivityAdminHomeBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        Button btnViewPendingRequests = findViewById(R.id.btnViewPendingRequests);
-        Button btnAddNotice = findViewById(R.id.btnAddNotice);
-        Button btnViewIssues = findViewById(R.id.btnViewIssues);
+        binding.btnViewPendingRequests.setOnClickListener(v -> 
+            startActivity(new Intent(AdminHomeActivity.this, ViewPendingRequestsActivity.class))
+        );
 
-        btnViewPendingRequests.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(AdminHomeActivity.this, ViewPendingRequestsActivity.class));
-            }
-        });
+        binding.btnAddNotice.setOnClickListener(v -> 
+            startActivity(new Intent(AdminHomeActivity.this, AddNoticeActivity.class))
+        );
 
-        btnAddNotice.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(AdminHomeActivity.this, AddNoticeActivity.class));
-            }
-        });
-
-        btnViewIssues.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(AdminHomeActivity.this, ViewIssuesActivity.class));
-            }
-        });
+        binding.btnViewIssues.setOnClickListener(v -> 
+            startActivity(new Intent(AdminHomeActivity.this, ViewIssuesActivity.class))
+        );
     }
 }

@@ -6,8 +6,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -15,13 +13,15 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.example.localconnect.R;
+import com.example.localconnect.databinding.ActivityReportIssueBinding;
 import com.example.localconnect.util.ImageUtil;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ReportIssueActivity extends AppCompatActivity {
 
-    ImageView imageView;
-    Button btnCamera;
+    private ActivityReportIssueBinding binding;
 
     // Camera Launcher
     private final ActivityResultLauncher<Intent> cameraLauncher =
@@ -37,7 +37,7 @@ public class ReportIssueActivity extends AppCompatActivity {
                                 if (bitmap != null) {
                                     Bitmap resized = ImageUtil.resize(bitmap, 600, 600);
                                     Bitmap gray = ImageUtil.toGrayScale(resized);
-                                    imageView.setImageBitmap(gray);
+                                    binding.issueImage.setImageBitmap(gray);
                                 }
                             }
                         }
@@ -60,12 +60,10 @@ public class ReportIssueActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_report_issue);
+        binding = ActivityReportIssueBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        imageView = findViewById(R.id.issueImage);
-        btnCamera = findViewById(R.id.btnCapture);
-
-        btnCamera.setOnClickListener(v -> checkPermissionAndLaunch());
+        binding.btnCapture.setOnClickListener(v -> checkPermissionAndLaunch());
     }
 
     private void checkPermissionAndLaunch() {

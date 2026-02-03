@@ -1,28 +1,32 @@
 package com.example.localconnect.viewmodel;
 
-import android.app.Application;
-
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.example.localconnect.data.IssueRepository;
 import com.example.localconnect.model.Issue;
 
 import java.util.List;
 
-public class IssueViewModel extends AndroidViewModel {
+import javax.inject.Inject;
 
-    private IssueRepository mRepository;
+import dagger.hilt.android.lifecycle.HiltViewModel;
 
-    private LiveData<List<Issue>> mAllIssues;
+@HiltViewModel
+public class IssueViewModel extends ViewModel {
 
-    public IssueViewModel (Application application) {
-        super(application);
-        mRepository = new IssueRepository(application);
-        mAllIssues = mRepository.getIssuesByArea("");
+    private final IssueRepository mRepository;
+
+    @Inject
+    public IssueViewModel(IssueRepository repository) {
+        this.mRepository = repository;
     }
 
-    public LiveData<List<Issue>> getIssuesByArea(String area) { return mRepository.getIssuesByArea(area); }
+    public LiveData<List<Issue>> getIssuesByArea(String area) {
+        return mRepository.getIssuesByArea(area);
+    }
 
-    public void insert(Issue issue) { mRepository.insert(issue); }
+    public void insert(Issue issue) {
+        mRepository.insert(issue);
+    }
 }

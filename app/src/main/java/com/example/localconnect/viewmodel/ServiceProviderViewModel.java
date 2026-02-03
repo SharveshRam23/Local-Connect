@@ -1,34 +1,44 @@
 package com.example.localconnect.viewmodel;
 
-import android.app.Application;
-
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.example.localconnect.data.ServiceProviderRepository;
 import com.example.localconnect.model.ServiceProvider;
 
 import java.util.List;
 
-public class ServiceProviderViewModel extends AndroidViewModel {
+import javax.inject.Inject;
 
-    private ServiceProviderRepository mRepository;
+import dagger.hilt.android.lifecycle.HiltViewModel;
 
-    private LiveData<List<ServiceProvider>> mPendingProviders;
-    private LiveData<List<ServiceProvider>> mApprovedProviders;
+@HiltViewModel
+public class ServiceProviderViewModel extends ViewModel {
 
-    public ServiceProviderViewModel (Application application) {
-        super(application);
-        mRepository = new ServiceProviderRepository(application);
-        mPendingProviders = mRepository.getPendingProviders();
-        mApprovedProviders = mRepository.getApprovedProviders();
+    private final ServiceProviderRepository mRepository;
+    private final LiveData<List<ServiceProvider>> mPendingProviders;
+    private final LiveData<List<ServiceProvider>> mApprovedProviders;
+
+    @Inject
+    public ServiceProviderViewModel(ServiceProviderRepository repository) {
+        this.mRepository = repository;
+        this.mPendingProviders = mRepository.getPendingProviders();
+        this.mApprovedProviders = mRepository.getApprovedProviders();
     }
 
-    public LiveData<List<ServiceProvider>> getPendingProviders() { return mPendingProviders; }
+    public LiveData<List<ServiceProvider>> getPendingProviders() {
+        return mPendingProviders;
+    }
 
-    public LiveData<List<ServiceProvider>> getApprovedProviders() { return mApprovedProviders; }
+    public LiveData<List<ServiceProvider>> getApprovedProviders() {
+        return mApprovedProviders;
+    }
 
-    public void insert(ServiceProvider serviceProvider) { mRepository.insert(serviceProvider); }
+    public void insert(ServiceProvider serviceProvider) {
+        mRepository.insert(serviceProvider);
+    }
 
-    public void update(ServiceProvider serviceProvider) { mRepository.update(serviceProvider); }
+    public void update(ServiceProvider serviceProvider) {
+        mRepository.update(serviceProvider);
+    }
 }
