@@ -10,33 +10,33 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Provider Login"
-        android:textSize="28sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:layout_marginBottom="32dp"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Phone Number"
         android:layout_marginBottom="16dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etProviderLoginPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Phone Number"
             android:inputType="phone"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Password"
         android:layout_marginBottom="24dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etProviderLoginPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password"
             android:inputType="textPassword"/>
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -45,15 +45,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Login"
-        android:textSize="16sp"/>
+        android:layout_marginBottom="16dp"/>
 
-    <TextView
+    <Button
         android:id="@+id/tvProviderRegisterLink"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="New Provider? Register Here"
-        android:layout_marginTop="16dp"
-        android:textColor="@android:color/holo_purple"
-        android:textSize="16sp"/>
+        style="@style/Widget.MaterialComponents.Button.TextButton"/>
 
 </LinearLayout>

@@ -48,7 +48,8 @@ public class MainActivity extends AppCompatActivity {
         Button btnAdminMode = findViewById(R.id.btnAdminMode);
 
         btnUserMode.setOnClickListener(v -> startActivity(new Intent(this, UserLoginActivity.class)));
-        btnProviderMode.setOnClickListener(v -> startActivity(new Intent(this, ProviderRegistrationActivity.class)));
+        btnProviderMode.setOnClickListener(
+                v -> startActivity(new Intent(this, com.example.localconnect.ui.provider.ProviderLoginActivity.class)));
         btnAdminMode.setOnClickListener(v -> startActivity(new Intent(this, AdminLoginActivity.class)));
 
         // Schedule Worker

@@ -5,46 +5,71 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/tvProviderStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Welcome Provider"
-        android:textSize="20sp"
-        android:layout_gravity="center_horizontal"
-        android:textStyle="bold"
-        android:layout_marginBottom="24dp"/>
-
-    <TextView
-        android:id="@+id/tvApprovalStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Status: Waiting for Approval"
-        android:textSize="18sp"
-        android:textColor="#FF9800"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="32dp"/>
-
-    <Switch
-        android:id="@+id/switchAvailability"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Available for Service"
-        android:textSize="18sp"
-        android:layout_gravity="center_horizontal"
-        android:checked="true"/>
-
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Notices"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/tvDashboardTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Provider Dashboard"
+            android:textSize="22sp"
+            android:textStyle="bold"/>
+
+        <Button
+            android:id="@+id/btnLogoutProvider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Logout"
+            style="@style/Widget.MaterialComponents.Button.TextButton"/>
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Availability Status"
+                android:textSize="16sp"/>
+
+            <Switch
+                android:id="@+id/switchAvailability"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Available"
+                android:checked="true"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="My Appointments"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:layout_marginTop="24dp"
         android:layout_marginBottom="8dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvProviderNotices"
+        android:id="@+id/rvProviderAppointments"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
