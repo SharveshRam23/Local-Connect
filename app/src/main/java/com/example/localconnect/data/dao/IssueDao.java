@@ -15,4 +15,13 @@ public interface IssueDao {
 
     @Query("SELECT * FROM issues ORDER BY timestamp DESC")
     List<Issue> getAllIssues();
+
+    @Query("SELECT * FROM issues WHERE pincode = :pincode ORDER BY timestamp DESC")
+    List<Issue> getIssuesByPincode(String pincode);
+
+    @Query("UPDATE issues SET status = :status, adminResponse = :response WHERE id = :id")
+    void updateIssueStatus(int id, String status, String response);
+
+    @Query("SELECT * FROM issues WHERE id = :id")
+    Issue getIssueById(int id);
 }

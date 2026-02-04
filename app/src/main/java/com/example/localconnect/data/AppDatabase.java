@@ -6,10 +6,12 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
+import com.example.localconnect.data.dao.BookingDao;
 import com.example.localconnect.data.dao.IssueDao;
 import com.example.localconnect.data.dao.NoticeDao;
 import com.example.localconnect.data.dao.ProviderDao;
 import com.example.localconnect.data.dao.UserDao;
+import com.example.localconnect.model.Booking;
 import com.example.localconnect.model.Issue;
 import com.example.localconnect.model.Notice;
 import com.example.localconnect.model.ServiceProvider;
@@ -19,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Database(entities = { User.class, ServiceProvider.class, Notice.class,
-        Issue.class }, version = 3, exportSchema = false)
+        Issue.class, Booking.class, com.example.localconnect.model.Comment.class }, version = 6, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UserDao userDao();
@@ -30,6 +32,10 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract IssueDao issueDao();
 
+    public abstract BookingDao bookingDao();
+
+    public abstract com.example.localconnect.data.dao.CommentDao commentDao();
+
     private static volatile AppDatabase INSTANCE;
     private static final int NUMBER_OF_THREADS = 4;
     public static final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
@@ -38,8 +44,9 @@ public abstract class AppDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
+                            INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                             AppDatabase.class, "local_connect_database")
+                            .addCallback(sRoomDatabaseCallback)
                             .fallbackToDestructiveMigration()
                             .build();
                 }
@@ -47,4 +54,24 @@ public abstract class AppDatabase extends RoomDatabase {
         }
         return INSTANCE;
     }
+
+    private static RoomDatabase.Callback sRoomDatabaseCallback = new RoomDatabase.Callback() {
+        @Override
+        public void onCreate(@androidx.annotation.NonNull androidx.sqlite.db.SupportSQLiteDatabase db) {
+            super.onCreate(db);
+            databaseWriteExecutor.execute(() -> {
+                try {
+                    AppDatabase database = INSTANCE;
+                    if (database != null) {
+                        UserDao dao = database.userDao();
+                        // Pre-populate admin
+                        User admin = new User("Admin", "admin", "000000", "admin123");
+                        dao.insert(admin);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    };
 }

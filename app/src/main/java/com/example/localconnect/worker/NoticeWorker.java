@@ -25,10 +25,18 @@ public class NoticeWorker extends Worker {
         try {
             SharedPreferences prefs = getApplicationContext().getSharedPreferences("local_connect_prefs",
                     Context.MODE_PRIVATE);
+            long lastCheckTime = prefs.getLong("last_notice_check_time", 0);
+            String userPincode = prefs.getString("user_pincode", "000000"); // Get actual pincode (mock for now or from session)
+
+            // Simulate fetching new notices for this area
+            // In a real app, we would call an API or check DB for notices > lastCheckTime
+            
+            // For demo, we just remind them occasionally if they assume "new" content
+            sendNotification("Local Connect", "Check for new announcements in " + userPincode + "!");
+
             // Updating check time
             prefs.edit().putLong("last_notice_check_time", System.currentTimeMillis()).apply();
 
-            sendNotification("LocalConnect", "Check latest community announcements!");
             return Result.success();
         } catch (Exception e) {
             return Result.failure();

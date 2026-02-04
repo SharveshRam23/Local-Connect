@@ -41,6 +41,15 @@ public class ProviderDashboardActivity extends AppCompatActivity {
             // TODO: Update availability in DB
         });
 
+        findViewById(R.id.btnProviderLogout).setOnClickListener(v -> {
+            SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+            prefs.edit().clear().apply();
+            android.content.Intent intent = new android.content.Intent(this, com.example.localconnect.MainActivity.class);
+            intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        });
+
         loadNotices();
     }
 

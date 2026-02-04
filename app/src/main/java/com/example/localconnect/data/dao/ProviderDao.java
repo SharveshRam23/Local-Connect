@@ -20,16 +20,16 @@ public interface ProviderDao {
     @androidx.room.Delete
     void delete(ServiceProvider provider);
 
-    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1")
+    @Query("SELECT * FROM service_providers WHERE isApproved = 1")
     List<ServiceProvider> getAllApprovedProviders();
 
-    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1 AND category = :category")
+    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND category = :category")
     List<ServiceProvider> getProvidersByCategory(String category);
 
-    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1 AND pincode = :pincode")
+    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND pincode = :pincode")
     List<ServiceProvider> getProvidersByPincode(String pincode);
 
-    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND isAvailable = 1 AND category = :category AND pincode = :pincode")
+    @Query("SELECT * FROM service_providers WHERE isApproved = 1 AND category = :category AND pincode = :pincode")
     List<ServiceProvider> getProvidersByCategoryAndPincode(String category, String pincode);
 
     @Query("SELECT * FROM service_providers WHERE isApproved = 0")

@@ -1,21 +1,29 @@
 package com.example.localconnect.model;
 
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-
-@Entity(tableName = "issues")
 public class Issue {
-    @PrimaryKey(autoGenerate = true)
-    public int id;
+    public String id;
     public String description;
     public String imagePath;
     public String pincode;
     public long timestamp;
+    public String status; // PENDING, IN_PROGRESS, RESOLVED
+    public String adminResponse;
+    public String reporterName;
 
-    public Issue(String description, String imagePath, String pincode, long timestamp) {
+    // Required for Firestore
+    public Issue() {}
+
+    public Issue(String id, String description, String imagePath, String pincode, long timestamp, String reporterName) {
+        this.id = id;
         this.description = description;
         this.imagePath = imagePath;
         this.pincode = pincode;
         this.timestamp = timestamp;
+        this.reporterName = reporterName;
+        this.status = "PENDING";
+    }
+
+    public Issue(String description, String imagePath, String pincode, long timestamp, String reporterName) {
+        this(null, description, imagePath, pincode, timestamp, reporterName);
     }
 }

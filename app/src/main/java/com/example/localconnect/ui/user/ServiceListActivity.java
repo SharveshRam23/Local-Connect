@@ -1,63 +1,102 @@
 package com.example.localconnect.ui.user;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.localconnect.R;
+import com.example.localconnect.databinding.ActivityServiceListBinding;
 import com.example.localconnect.data.AppDatabase;
 import com.example.localconnect.model.ServiceProvider;
+import com.example.localconnect.ui.adapter.ProviderAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ServiceListActivity extends AppCompatActivity {
 
-    private RecyclerView rvProviders;
-    private Spinner spinnerCategory;
-    private EditText etFilterPincode;
-    private Button btnFilter;
+    private ActivityServiceListBinding binding;
+    private ProviderAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_service_list);
+        binding = ActivityServiceListBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        rvProviders = findViewById(R.id.rvProviders);
-        spinnerCategory = findViewById(R.id.spinnerCategory);
-        etFilterPincode = findViewById(R.id.etFilterPincode);
-        btnFilter = findViewById(R.id.btnFilter);
-
-        rvProviders.setLayoutManager(new LinearLayoutManager(this));
+        binding.rvProviders.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new ProviderAdapter(provider -> {
+            Intent intent = new Intent(this, ProviderProfileActivity.class);
+            intent.putExtra("provider_id", provider.id);
+            startActivity(intent);
+        });
+        binding.rvProviders.setAdapter(adapter);
 
         setupSpinner();
 
-        btnFilter.setOnClickListener(v -> filterProviders());
+        binding.btnFilter.setOnClickListener(v -> filterProviders());
 
-        loadAllProviders();
+        // Default: Load nearby providers
+        loadNearbyProviders();
     }
 
     private void setupSpinner() {
-        // Example categories
         String[] categories = { "All", "Plumber", "Electrician", "Carpenter", "Maid" };
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(adapter);
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerCategory.setAdapter(spinnerAdapter);
+    }
+
+    private void loadNearbyProviders() {
+        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+        String pincode = prefs.getString("user_pincode", "");
+        if (!pincode.isEmpty()) {
+            binding.etFilterPincode.setText(pincode);
+            filterProviders();
+        } else {
+            loadAllProviders();
+        }
     }
 
     private void loadAllProviders() {
-        // TODO: Load all approved providers from DB
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            List<ServiceProvider> providers = AppDatabase.getDatabase(getApplicationContext())
+                    .providerDao().getAllApprovedProviders();
+            runOnUiThread(() -> adapter.setProviders(providers));
+        });
     }
 
     private void filterProviders() {
-        String category = spinnerCategory.getSelectedItem().toString();
-        String pincode = etFilterPincode.getText().toString().trim();
-        // TODO: Filter logic using DAO
+        String category = binding.spinnerCategory.getSelectedItem().toString();
+        String pincode = binding.etFilterPincode.getText().toString().trim();
+
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            List<ServiceProvider> providers;
+            if (category.equals("All")) {
+                if (pincode.isEmpty()) {
+                    providers = AppDatabase.getDatabase(getApplicationContext()).providerDao().getAllApprovedProviders();
+                } else {
+                    providers = AppDatabase.getDatabase(getApplicationContext()).providerDao().getProvidersByPincode(pincode);
+                }
+            } else {
+                if (pincode.isEmpty()) {
+                    providers = AppDatabase.getDatabase(getApplicationContext()).providerDao().getProvidersByCategory(category);
+                } else {
+                    providers = AppDatabase.getDatabase(getApplicationContext()).providerDao().getProvidersByCategoryAndPincode(category, pincode);
+                }
+            }
+            runOnUiThread(() -> {
+                adapter.setProviders(providers);
+                if (providers.isEmpty()) {
+                    Toast.makeText(this, "No providers found", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
     }
 }

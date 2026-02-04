@@ -1,12 +1,5 @@
-package com.example.localconnect.model;
-
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-
-@Entity(tableName = "service_providers")
 public class ServiceProvider {
-    @PrimaryKey(autoGenerate = true)
-    public int id;
+    public String id;
     public String name;
     public String category;
     public String pincode;
@@ -18,8 +11,15 @@ public class ServiceProvider {
     public String password;
     public String experience;
 
-    public ServiceProvider(String name, String category, String pincode, String phone, String password,
+    public String availableFrom;
+    public String availableTo;
+
+    // Required for Firestore
+    public ServiceProvider() {}
+
+    public ServiceProvider(String id, String name, String category, String pincode, String phone, String password,
             String experience) {
+        this.id = id;
         this.name = name;
         this.category = category;
         this.pincode = pincode;
@@ -29,5 +29,12 @@ public class ServiceProvider {
         this.isApproved = false; // Default false
         this.isAvailable = true; // Default true
         this.approvalTime = 0;
+        this.availableFrom = "09:00"; // Default
+        this.availableTo = "18:00"; // Default
+    }
+
+    public ServiceProvider(String name, String category, String pincode, String phone, String password,
+            String experience) {
+        this(null, name, category, pincode, phone, password, experience);
     }
 }

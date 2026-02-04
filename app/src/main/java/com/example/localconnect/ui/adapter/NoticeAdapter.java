@@ -22,7 +22,11 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.NoticeView
     private List<Notice> notices = new ArrayList<>();
 
     public void setNotices(List<Notice> notices) {
-        this.notices = notices;
+        if (notices == null) {
+            this.notices = new ArrayList<>();
+        } else {
+            this.notices = notices;
+        }
         notifyDataSetChanged();
     }
 
@@ -62,6 +66,16 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.NoticeView
 
             SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
             tvTime.setText(sdf.format(new Date(notice.scheduledTime)));
+
+            itemView.setOnClickListener(v -> {
+                android.content.Context context = v.getContext();
+                android.content.Intent intent = new android.content.Intent(context, com.example.localconnect.ui.user.NoticeDetailActivity.class);
+                intent.putExtra("notice_id", notice.id);
+                intent.putExtra("notice_title", notice.title);
+                intent.putExtra("notice_content", notice.content);
+                intent.putExtra("notice_time", notice.scheduledTime);
+                context.startActivity(intent);
+            });
         }
     }
 }

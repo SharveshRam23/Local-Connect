@@ -6,44 +6,39 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import com.example.localconnect.R;
+import com.example.localconnect.databinding.ActivityUserRegistrationBinding;
 import com.example.localconnect.data.AppDatabase;
 import com.example.localconnect.model.User;
 import com.example.localconnect.util.LocationHelper;
-import com.google.android.material.textfield.TextInputEditText;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class UserRegistrationActivity extends AppCompatActivity {
 
-    private TextInputEditText etName, etPhone, etPincode, etPassword;
-    private Button btnDetectLocation, btnRegister;
+    private ActivityUserRegistrationBinding binding;
     private LocationHelper locationHelper;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.UserDao userDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_registration);
-
-        etName = findViewById(R.id.etName);
-        etPhone = findViewById(R.id.etPhone);
-        etPincode = findViewById(R.id.etPincode);
-        etPassword = findViewById(R.id.etPassword);
-        btnDetectLocation = findViewById(R.id.btnDetectLocation);
-        btnRegister = findViewById(R.id.btnRegister);
+        binding = ActivityUserRegistrationBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         locationHelper = new LocationHelper(this);
 
-        btnDetectLocation.setOnClickListener(v -> checkAndRequestLocationPermission());
-
-        btnRegister.setOnClickListener(v -> registerUser());
+        binding.btnDetectLocation.setOnClickListener(v -> checkAndRequestLocationPermission());
+        binding.btnRegister.setOnClickListener(v -> registerUser());
     }
 
     private void checkAndRequestLocationPermission() {
@@ -63,7 +58,7 @@ public class UserRegistrationActivity extends AppCompatActivity {
         locationHelper.getCurrentPincode(this, new LocationHelper.LocationResultListener() {
             @Override
             public void onLocationFound(String pincode) {
-                etPincode.setText(pincode);
+                binding.etPincode.setText(pincode);
                 Toast.makeText(UserRegistrationActivity.this, "Location detected", Toast.LENGTH_SHORT).show();
             }
 
@@ -88,10 +83,10 @@ public class UserRegistrationActivity extends AppCompatActivity {
     }
 
     private void registerUser() {
-        String name = etName.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
-        String pincode = etPincode.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
+        String name = binding.etName.getText().toString().trim();
+        String phone = binding.etPhone.getText().toString().trim();
+        String pincode = binding.etPincode.getText().toString().trim();
+        String password = binding.etPassword.getText().toString().trim();
 
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(phone) || TextUtils.isEmpty(pincode)
                 || TextUtils.isEmpty(password)) {
@@ -99,9 +94,9 @@ public class UserRegistrationActivity extends AppCompatActivity {
             return;
         }
 
-        AppDatabase.databaseWriteExecutor.execute(() -> {
+        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
             User user = new User(name, phone, pincode, password);
-            AppDatabase.getDatabase(getApplicationContext()).userDao().insert(user);
+            userDao.insert(user);
             runOnUiThread(() -> {
                 Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show();
 
@@ -110,6 +105,7 @@ public class UserRegistrationActivity extends AppCompatActivity {
                 prefs.edit()
                         .putString("user_pincode", pincode)
                         .putString("user_name", name)
+                        .putString("user_phone", phone)
                         .putBoolean("is_user_login", true)
                         .apply();
 

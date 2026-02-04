@@ -1,6 +1,7 @@
 package com.example.localconnect.ui.admin;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -14,10 +15,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.localconnect.R;
 import com.example.localconnect.data.AppDatabase;
 import com.example.localconnect.model.Notice;
+import com.example.localconnect.model.ServiceProvider;
 import com.example.localconnect.ui.adapter.NoticeAdapter;
+import com.example.localconnect.ui.adapter.ProviderAdapter;
 
 import java.util.List;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class AdminDashboardActivity extends AppCompatActivity {
 
     private Button btnApproveProviders, btnPostNotice;
@@ -42,6 +48,18 @@ public class AdminDashboardActivity extends AppCompatActivity {
         btnApproveProviders.setOnClickListener(v -> showPendingProvidersDialog());
         btnPostNotice.setOnClickListener(v -> showPostNoticeDialog());
         btnViewUsers.setOnClickListener(v -> showUsersDialog());
+        findViewById(R.id.btnManageIssues).setOnClickListener(v -> {
+            startActivity(new Intent(this, AdminIssueListActivity.class));
+        });
+
+        findViewById(R.id.btnAdminLogout).setOnClickListener(v -> {
+            android.content.SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+            prefs.edit().clear().apply();
+            Intent intent = new Intent(this, com.example.localconnect.MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        });
 
         loadNotices();
     }
@@ -52,8 +70,31 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         RecyclerView rvProviders = new RecyclerView(this);
         rvProviders.setLayoutManager(new LinearLayoutManager(this));
-        com.example.localconnect.ui.adapter.ProviderAdapter providerAdapter = new com.example.localconnect.ui.adapter.ProviderAdapter();
-        rvProviders.setAdapter(providerAdapter);
+        ProviderAdapter providerAdapter = new ProviderAdapter(new ProviderAdapter.OnAdminActionListener() {
+            @Override
+            public void onApprove(ServiceProvider provider) {
+                approveProvider(provider, null); // The second param is not used in the new implementation as effectively
+                // But wait, the original code passes 'adapter' to approve/reject to reload.
+            }
+
+            @Override
+            public void onReject(ServiceProvider provider) {
+                rejectProvider(provider, null);
+            }
+        });
+        // Actually, let's keep the helper methods and just fix the instantiation.
+        ProviderAdapter finalAdapter = new ProviderAdapter(new ProviderAdapter.OnAdminActionListener() {
+            @Override
+            public void onApprove(ServiceProvider provider) {
+                approveProvider(provider, (ProviderAdapter) rvProviders.getAdapter());
+            }
+
+            @Override
+            public void onReject(ServiceProvider provider) {
+                rejectProvider(provider, (ProviderAdapter) rvProviders.getAdapter());
+            }
+        });
+        rvProviders.setAdapter(finalAdapter);
 
         builder.setView(rvProviders);
         builder.setPositiveButton("Close", null);
@@ -61,88 +102,48 @@ public class AdminDashboardActivity extends AppCompatActivity {
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        loadPendingProviders(providerAdapter);
+        loadPendingProviders(finalAdapter);
     }
 
-    private void loadPendingProviders(com.example.localconnect.ui.adapter.ProviderAdapter adapter) {
+    private void loadPendingProviders(ProviderAdapter adapter) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            List<com.example.localconnect.model.ServiceProvider> pendingProviders = AppDatabase
+            List<ServiceProvider> pendingProviders = AppDatabase
                     .getDatabase(getApplicationContext())
                     .providerDao().getPendingProviders();
 
             runOnUiThread(() -> {
                 if (pendingProviders == null || pendingProviders.isEmpty()) {
                     Toast.makeText(this, "No pending providers.", Toast.LENGTH_SHORT).show();
+                    adapter.setProviders(new java.util.ArrayList<>());
+                } else {
+                    adapter.setProviders(pendingProviders);
                 }
-                adapter.setProviders(pendingProviders,
-                        new com.example.localconnect.ui.adapter.ProviderAdapter.OnProviderActionListener() {
-                            @Override
-                            public void onApprove(com.example.localconnect.model.ServiceProvider provider) {
-                                approveProvider(provider, adapter);
-                            }
-
-                            @Override
-                            public void onReject(com.example.localconnect.model.ServiceProvider provider) {
-                                rejectProvider(provider, adapter);
-                            }
-                        });
             });
         });
     }
 
-    private void approveProvider(com.example.localconnect.model.ServiceProvider provider,
-            com.example.localconnect.ui.adapter.ProviderAdapter adapter) {
+    private void approveProvider(ServiceProvider provider, ProviderAdapter adapter) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             AppDatabase.getDatabase(getApplicationContext()).providerDao().updateApprovalStatus(provider.id, true,
                     System.currentTimeMillis());
             runOnUiThread(() -> {
                 Toast.makeText(this, "Provider Approved!", Toast.LENGTH_SHORT).show();
-                // Notify Provider (Simulated or Local Notification if on same device)
                 com.example.localconnect.util.NotificationUtil.showApprovalNotification(this, "Provider Approved",
                         "Approved " + provider.name);
 
-                // Reload list
-                loadPendingProviders(adapter);
+                if (adapter != null) loadPendingProviders(adapter);
             });
         });
     }
 
-    private void rejectProvider(com.example.localconnect.model.ServiceProvider provider,
-            com.example.localconnect.ui.adapter.ProviderAdapter adapter) {
+    private void rejectProvider(ServiceProvider provider, ProviderAdapter adapter) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            // For rejection, we might just delete them or set a rejected flag.
-            // The user said "On reject -> delete or mark rejected".
-            // I'll delete for simplicity as I didn't add a 'REJECTED' status enum, just
-            // boolean isApproved.
-            // Or I can add a method to delete. I need to check ProviderDao if delete
-            // exists.
-            // ProviderDao doesn't have delete method yet. I used @Update and @Insert.
-            // I will use updateApprovalStatus with false (stays false) but maybe I should
-            // have a way to distinguish?
-            // The user said "delete or mark rejected".
-            // Since I don't have delete method, I will assume marking rejected means
-            // keeping isApproved=false?
-            // But they are ALREADY false.
-            // I'll assume I need to Delete. But I can't delete without a delete method.
-            // I'll implement a delete action or just leave them pending/rejected.
-            // Actually, I'll just remove them from the list visually or implement delete in
-            // DAO now.
-            // Wait, I can't modify DAO in this file.
-            // I'll come back to DAO later if needed. For now, I'll just show a Toast and
-            // "Simulate" rejection by not changing status.
-            // OR, I can set approvalTime to -1 to signify rejection?
-            // Let's stick to "delete". I'll add @Delete to DAO in next step or now.
-            // I shouldn't leave the file half-baked.
-            // I'll make a helper to delete.
-            // BUT, I can't invoke a missing method.
-            // I'll mark them as "Rejected" by using a negative approval time or similar
-            // hack, or just delete.
-            // I'll ADD DELETE TO DAO in the next turn if I forgot.
-            // Checking ProviderDao content earlier... I only saw Insert/Update/Queries.
-            // I'll add `delete(ServiceProvider provider)` to DAO in the next step.
-            // For now, I will comment out the actual DAO call and put a TODO.
+            AppDatabase.getDatabase(getApplicationContext()).providerDao().delete(provider);
+            runOnUiThread(() -> {
+                Toast.makeText(this, "Provider Rejected (Deleted)", Toast.LENGTH_SHORT).show();
+                if (adapter != null) loadPendingProviders(adapter);
+            });
         });
-        Toast.makeText(this, "Rejection implemented in next step (DAO update needed)", Toast.LENGTH_SHORT).show();
     }
 
     private void showUsersDialog() {

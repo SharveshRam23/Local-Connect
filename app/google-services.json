@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1012372800603",
+    "project_id": "localconnect-87b90",
+    "storage_bucket": "localconnect-87b90.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1012372800603:android:cff71d69ff98c3e2742b7e",
+        "android_client_info": {
+          "package_name": "com.example.localconnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVk-r2uqlXHgUqeFr5HlduF8rQI0qMVYY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

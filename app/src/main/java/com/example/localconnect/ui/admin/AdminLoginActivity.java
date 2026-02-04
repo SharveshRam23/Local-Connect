@@ -1,43 +1,68 @@
 package com.example.localconnect.ui.admin;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.Button;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.localconnect.R;
-import com.google.android.material.textfield.TextInputEditText;
+import com.example.localconnect.databinding.ActivityAdminLoginBinding;
+import com.example.localconnect.data.AppDatabase;
+import com.example.localconnect.model.User;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class AdminLoginActivity extends AppCompatActivity {
 
-    private TextInputEditText etUsername, etPassword;
-    private Button btnLogin;
+    private ActivityAdminLoginBinding binding;
+
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.UserDao userDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin_login);
+        binding = ActivityAdminLoginBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        etUsername = findViewById(R.id.etAdminUsername);
-        etPassword = findViewById(R.id.etAdminPassword);
-        btnLogin = findViewById(R.id.btnAdminLogin);
-
-        btnLogin.setOnClickListener(v -> login());
+        binding.btnAdminLogin.setOnClickListener(v -> login());
     }
 
     private void login() {
-        String username = etUsername.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
+        String username = binding.etAdminUsername.getText().toString().trim();
+        String password = binding.etAdminPassword.getText().toString().trim();
 
-        if (username.equals("admin") && password.equals("admin123")) {
-            Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(AdminLoginActivity.this, AdminDashboardActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
-            Toast.makeText(this, "Invalid Credentials", Toast.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+            try {
+                User admin = userDao.login(username, password);
+                runOnUiThread(() -> {
+                    if (admin != null) {
+                        Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
+
+                        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+                        prefs.edit()
+                                .putBoolean("is_admin_login", true)
+                                .putString("user_name", admin.name)
+                                .apply();
+
+                        Intent intent = new Intent(AdminLoginActivity.this, AdminDashboardActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(this, "Invalid Credentials", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 }

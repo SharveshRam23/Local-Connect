@@ -48,23 +48,26 @@ public class LocationHelper {
                     @Override
                     public void onSuccess(Location location) {
                         if (location != null) {
-                            try {
-                                Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-                                List<Address> addresses = geocoder.getFromLocation(location.getLatitude(),
-                                        location.getLongitude(), 1);
-                                if (addresses != null && !addresses.isEmpty()) {
-                                    String postalCode = addresses.get(0).getPostalCode();
-                                    if (postalCode != null) {
-                                        listener.onLocationFound(postalCode);
+                            // Run Geocoder on background thread
+                            new Thread(() -> {
+                                try {
+                                    Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+                                    List<Address> addresses = geocoder.getFromLocation(location.getLatitude(),
+                                            location.getLongitude(), 1);
+                                    if (addresses != null && !addresses.isEmpty()) {
+                                        String postalCode = addresses.get(0).getPostalCode();
+                                        if (postalCode != null) {
+                                            activity.runOnUiThread(() -> listener.onLocationFound(postalCode));
+                                        } else {
+                                            activity.runOnUiThread(() -> listener.onError("Pincode not found in location data"));
+                                        }
                                     } else {
-                                        listener.onError("Pincode not found in location data");
+                                        activity.runOnUiThread(() -> listener.onError("No address found"));
                                     }
-                                } else {
-                                    listener.onError("No address found");
+                                } catch (IOException e) {
+                                    activity.runOnUiThread(() -> listener.onError("Geocoder error: " + e.getMessage()));
                                 }
-                            } catch (IOException e) {
-                                listener.onError("Geocoder error: " + e.getMessage());
-                            }
+                            }).start();
                         } else {
                             listener.onError("Location is null. Turn on GPS.");
                         }

@@ -4,49 +4,54 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.localconnect.R;
+import com.example.localconnect.databinding.ActivityUserHomeBinding;
 import com.example.localconnect.data.AppDatabase;
 import com.example.localconnect.model.Notice;
-import com.example.localconnect.ui.issue.ReportIssueActivity;
 import com.example.localconnect.ui.adapter.NoticeAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class UserHomeActivity extends AppCompatActivity {
 
-    private RecyclerView rvNotices;
-    private Button btnFindServices, btnReportIssue;
-    private TextView tvWelcome;
+    private ActivityUserHomeBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_home);
+        binding = ActivityUserHomeBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        rvNotices = findViewById(R.id.rvNotices);
-        btnFindServices = findViewById(R.id.btnFindServices);
-        btnReportIssue = findViewById(R.id.btnReportIssue);
-        tvWelcome = findViewById(R.id.tvWelcome);
+        binding.rvNotices.setLayoutManager(new LinearLayoutManager(this));
 
-        rvNotices.setLayoutManager(new LinearLayoutManager(this));
-
-        // Basic navigation setup
-        btnFindServices.setOnClickListener(v -> {
+        binding.btnFindServices.setOnClickListener(v -> {
             startActivity(new Intent(UserHomeActivity.this, ServiceListActivity.class));
         });
 
-        btnReportIssue.setOnClickListener(v -> {
-            // Assuming ReportIssueActivity will be created
+        binding.btnReportIssue.setOnClickListener(v -> {
             Intent intent = new Intent(this, com.example.localconnect.ui.issue.ReportIssueActivity.class);
             startActivity(intent);
+        });
+
+        binding.btnViewNearbyIssues.setOnClickListener(v -> {
+            Intent intent = new Intent(this, com.example.localconnect.ui.issue.NearbyIssuesActivity.class);
+            startActivity(intent);
+        });
+
+        binding.btnLogout.setOnClickListener(v -> {
+            SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+            prefs.edit().clear().apply();
+            Intent intent = new Intent(this, com.example.localconnect.MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
         });
 
         loadNotices();
@@ -57,7 +62,7 @@ public class UserHomeActivity extends AppCompatActivity {
         String pincode = prefs.getString("user_pincode", "");
 
         NoticeAdapter adapter = new NoticeAdapter();
-        rvNotices.setAdapter(adapter);
+        binding.rvNotices.setAdapter(adapter);
 
         AppDatabase.databaseWriteExecutor.execute(() -> {
             List<Notice> notices = AppDatabase.getDatabase(getApplicationContext()).noticeDao()
@@ -65,10 +70,9 @@ public class UserHomeActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 if (notices != null && !notices.isEmpty()) {
                     adapter.setNotices(notices);
-                    rvNotices.setVisibility(View.VISIBLE);
+                    binding.rvNotices.setVisibility(View.VISIBLE);
                 } else {
-                    // Optional: Show "No notices" text
-                    rvNotices.setVisibility(View.GONE);
+                    binding.rvNotices.setVisibility(View.GONE);
                 }
             });
         });
