@@ -50,6 +50,12 @@ public class ProviderDashboardActivity extends AppCompatActivity {
             finish();
         });
 
+        findViewById(R.id.btnHome).setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(this, com.example.localconnect.MainActivity.class);
+            intent.putExtra("from_dashboard", true);
+            startActivity(intent);
+        });
+
         loadNotices();
     }
 

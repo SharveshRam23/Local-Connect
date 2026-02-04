@@ -25,7 +25,7 @@ public class AdminIssueDetailActivity extends AppCompatActivity {
     private RadioGroup rgStatus;
     private EditText etReply;
     private Button btnUpdate;
-    private int issueId;
+    private String issueId;
     private Issue currentIssue;
 
     @Override
@@ -38,7 +38,7 @@ public class AdminIssueDetailActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        issueId = getIntent().getIntExtra("issue_id", -1);
+        issueId = getIntent().getStringExtra("issue_id");
 
         ivImage = findViewById(R.id.ivDetailImage);
         tvReporter = findViewById(R.id.tvDetailReporter);

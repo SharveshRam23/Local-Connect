@@ -17,8 +17,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class BookingActivity extends AppCompatActivity {
 
     private ActivityBookingBinding binding;
-    private int providerId;
-    private int userId;
+    private String providerId;
+    private String userId;
     private com.example.localconnect.model.ServiceProvider currentProvider;
 
     @javax.inject.Inject
@@ -32,12 +32,12 @@ public class BookingActivity extends AppCompatActivity {
         binding = ActivityBookingBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        providerId = getIntent().getIntExtra("provider_id", -1);
+        providerId = getIntent().getStringExtra("provider_id");
         
         SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
-        userId = prefs.getInt("user_id", -1);
+        userId = prefs.getString("user_id", null);
 
-        if (providerId == -1 || userId == -1) {
+        if (providerId == null || userId == null) {
             Toast.makeText(this, "Error: Session or Provider not found", Toast.LENGTH_SHORT).show();
             finish();
             return;

@@ -55,7 +55,7 @@ public class UserLoginActivity extends AppCompatActivity {
                                 .putString("user_pincode", user.pincode)
                                 .putString("user_name", user.name)
                                 .putString("user_phone", user.phone)
-                                .putInt("user_id", user.id)
+                                .putString("user_id", user.id)
                                 .putBoolean("is_user_login", true)
                                 .apply();
 

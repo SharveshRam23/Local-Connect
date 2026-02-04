@@ -14,5 +14,5 @@ public interface CommentDao {
     void insert(Comment comment);
 
     @Query("SELECT * FROM comments WHERE noticeId = :noticeId ORDER BY timestamp ASC")
-    List<Comment> getCommentsForNotice(int noticeId);
+    List<Comment> getCommentsForNotice(String noticeId);
 }

@@ -18,11 +18,11 @@ public interface BookingDao {
     void update(Booking booking);
 
     @Query("SELECT * FROM bookings WHERE userId = :userId")
-    List<Booking> getBookingsForUser(int userId);
+    List<Booking> getBookingsForUser(String userId);
 
     @Query("SELECT * FROM bookings WHERE providerId = :providerId")
-    List<Booking> getBookingsForProvider(int providerId);
+    List<Booking> getBookingsForProvider(String providerId);
 
     @Query("UPDATE bookings SET status = :status WHERE id = :id")
-    void updateStatus(int id, String status);
+    void updateStatus(String id, String status);
 }

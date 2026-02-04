@@ -61,6 +61,12 @@ public class AdminDashboardActivity extends AppCompatActivity {
             finish();
         });
 
+        findViewById(R.id.btnHome).setOnClickListener(v -> {
+            Intent intent = new Intent(this, com.example.localconnect.MainActivity.class);
+            intent.putExtra("from_dashboard", true);
+            startActivity(intent);
+        });
+
         loadNotices();
     }
 

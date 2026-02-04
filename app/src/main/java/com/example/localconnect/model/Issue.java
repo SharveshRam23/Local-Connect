@@ -1,6 +1,14 @@
 package com.example.localconnect.model;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "issues")
 public class Issue {
+    @PrimaryKey
+    @NonNull
     public String id;
     public String description;
     public String imagePath;
@@ -23,7 +31,8 @@ public class Issue {
         this.status = "PENDING";
     }
 
+    @Ignore
     public Issue(String description, String imagePath, String pincode, long timestamp, String reporterName) {
-        this(null, description, imagePath, pincode, timestamp, reporterName);
+        this(java.util.UUID.randomUUID().toString(), description, imagePath, pincode, timestamp, reporterName);
     }
 }

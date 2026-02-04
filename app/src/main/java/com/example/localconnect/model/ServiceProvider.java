@@ -1,4 +1,14 @@
+package com.example.localconnect.model;
+
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "service_providers")
 public class ServiceProvider {
+    @PrimaryKey
+    @NonNull
     public String id;
     public String name;
     public String category;
@@ -33,8 +43,9 @@ public class ServiceProvider {
         this.availableTo = "18:00"; // Default
     }
 
+    @Ignore
     public ServiceProvider(String name, String category, String pincode, String phone, String password,
             String experience) {
-        this(null, name, category, pincode, phone, password, experience);
+        this(java.util.UUID.randomUUID().toString(), name, category, pincode, phone, password, experience);
     }
 }

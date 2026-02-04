@@ -1,6 +1,14 @@
 package com.example.localconnect.model;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "bookings")
 public class Booking {
+    @PrimaryKey
+    @NonNull
     public String id;
     public String userId;
     public String providerId;
@@ -22,7 +30,8 @@ public class Booking {
         this.status = "PENDING";
     }
 
+    @Ignore
     public Booking(String userId, String providerId, String workType, String date, String details) {
-        this(null, userId, providerId, workType, date, details);
+        this(java.util.UUID.randomUUID().toString(), userId, providerId, workType, date, details);
     }
 }

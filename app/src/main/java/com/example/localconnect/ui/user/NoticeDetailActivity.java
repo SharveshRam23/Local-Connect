@@ -31,7 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class NoticeDetailActivity extends AppCompatActivity {
 
     private ActivityNoticeDetailBinding binding;
-    private int noticeId;
+    private String noticeId;
     private String noticeTitle;
     private String noticeContent;
     private long noticeTime;
@@ -48,13 +48,13 @@ public class NoticeDetailActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         if (getIntent() != null) {
-            noticeId = getIntent().getIntExtra("notice_id", -1);
+            noticeId = getIntent().getStringExtra("notice_id");
             noticeTitle = getIntent().getStringExtra("notice_title");
             noticeContent = getIntent().getStringExtra("notice_content");
             noticeTime = getIntent().getLongExtra("notice_time", 0);
         }
 
-        if (noticeId == -1) {
+        if (noticeId == null) {
             finish();
             return;
         }
@@ -91,10 +91,10 @@ public class NoticeDetailActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(content)) return;
 
         SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
-        int userId = prefs.getInt("user_id", -1);
+        String userId = prefs.getString("user_id", null);
         String userName = prefs.getString("user_name", "Anonymous");
 
-        if (userId == -1) {
+        if (userId == null) {
             Toast.makeText(this, "You must be logged in to comment", Toast.LENGTH_SHORT).show();
             return;
         }

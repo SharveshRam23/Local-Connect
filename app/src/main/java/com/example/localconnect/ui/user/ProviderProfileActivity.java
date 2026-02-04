@@ -16,7 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class ProviderProfileActivity extends AppCompatActivity {
 
     private ActivityProviderProfileBinding binding;
-    private int providerId;
+    private String providerId;
     private ServiceProvider currentProvider;
 
     @javax.inject.Inject
@@ -28,8 +28,8 @@ public class ProviderProfileActivity extends AppCompatActivity {
         binding = ActivityProviderProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        providerId = getIntent().getIntExtra("provider_id", -1);
-        if (providerId == -1) {
+        providerId = getIntent().getStringExtra("provider_id");
+        if (providerId == null) {
             Toast.makeText(this, "Error: Provider not found", Toast.LENGTH_SHORT).show();
             finish();
             return;

@@ -60,4 +60,7 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     annotationProcessor(libs.hilt.android.compiler)
+    
+    // Guava for ListenableFuture (required by WorkManager)
+    implementation("com.google.guava:guava:31.1-android")
 }

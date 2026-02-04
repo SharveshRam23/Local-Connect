@@ -20,9 +20,9 @@ public class SessionManager {
         editor = prefs.edit();
     }
 
-    public void createProviderSession(int id, String name, String pincode) {
+    public void createProviderSession(String id, String name, String pincode) {
         editor.putBoolean(KEY_IS_PROVIDER_LOGIN, true);
-        editor.putInt(KEY_PROVIDER_ID, id);
+        editor.putString(KEY_PROVIDER_ID, id);
         editor.putString(KEY_PROVIDER_NAME, name);
         editor.putString(KEY_PROVIDER_PINCODE, pincode);
         editor.apply();
@@ -32,8 +32,8 @@ public class SessionManager {
         return prefs.getBoolean(KEY_IS_PROVIDER_LOGIN, false);
     }
 
-    public int getProviderId() {
-        return prefs.getInt(KEY_PROVIDER_ID, -1);
+    public String getProviderId() {
+        return prefs.getString(KEY_PROVIDER_ID, null);
     }
 
     public String getProviderName() {

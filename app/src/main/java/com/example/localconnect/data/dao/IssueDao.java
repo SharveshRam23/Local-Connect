@@ -20,8 +20,8 @@ public interface IssueDao {
     List<Issue> getIssuesByPincode(String pincode);
 
     @Query("UPDATE issues SET status = :status, adminResponse = :response WHERE id = :id")
-    void updateIssueStatus(int id, String status, String response);
+    void updateIssueStatus(String id, String status, String response);
 
     @Query("SELECT * FROM issues WHERE id = :id")
-    Issue getIssueById(int id);
+    Issue getIssueById(String id);
 }

@@ -106,6 +106,7 @@ public class UserRegistrationActivity extends AppCompatActivity {
                         .putString("user_pincode", pincode)
                         .putString("user_name", name)
                         .putString("user_phone", phone)
+                        .putString("user_id", user.id)
                         .putBoolean("is_user_login", true)
                         .apply();
 

@@ -54,6 +54,12 @@ public class UserHomeActivity extends AppCompatActivity {
             finish();
         });
 
+        binding.btnHome.setOnClickListener(v -> {
+            Intent intent = new Intent(this, com.example.localconnect.MainActivity.class);
+            intent.putExtra("from_dashboard", true);
+            startActivity(intent);
+        });
+
         loadNotices();
     }
 

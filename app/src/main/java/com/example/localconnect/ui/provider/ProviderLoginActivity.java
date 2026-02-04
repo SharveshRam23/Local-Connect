@@ -59,13 +59,8 @@ public class ProviderLoginActivity extends AppCompatActivity {
                     if (provider != null) {
                         if (provider.isApproved) {
                             // Login Success
-                            SharedPreferences prefs = getSharedPreferences("local_connect_prefs", Context.MODE_PRIVATE);
-                            prefs.edit()
-                                    .putBoolean("is_provider_login", true)
-                                    .putString("provider_name", provider.name)
-                                    .putString("provider_pincode", provider.pincode)
-                                    .putInt("provider_id", provider.id)
-                                    .apply();
+                            com.example.localconnect.util.SessionManager sessionManager = new com.example.localconnect.util.SessionManager(this);
+                            sessionManager.createProviderSession(provider.id, provider.name, provider.pincode);
 
                             Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(ProviderLoginActivity.this, ProviderDashboardActivity.class);
