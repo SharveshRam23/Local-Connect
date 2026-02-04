@@ -14,12 +14,14 @@ import com.example.localconnect.model.Issue;
 import com.example.localconnect.model.Notice;
 import com.example.localconnect.model.ServiceProvider;
 import com.example.localconnect.model.User;
+import com.example.localconnect.model.Appointment;
+import com.example.localconnect.data.dao.AppointmentDao;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Database(entities = { User.class, ServiceProvider.class, Notice.class,
-        Issue.class }, version = 3, exportSchema = false)
+        Issue.class, Appointment.class }, version = 4, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UserDao userDao();
@@ -29,6 +31,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract NoticeDao noticeDao();
 
     public abstract IssueDao issueDao();
+
+    public abstract AppointmentDao appointmentDao();
 
     private static volatile AppDatabase INSTANCE;
     private static final int NUMBER_OF_THREADS = 4;

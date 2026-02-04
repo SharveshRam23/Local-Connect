@@ -1,10 +1,15 @@
 package com.example.localconnect.ui.provider;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -12,56 +17,124 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.localconnect.R;
 import com.example.localconnect.data.AppDatabase;
-import com.example.localconnect.model.Notice;
-import com.example.localconnect.ui.adapter.NoticeAdapter;
+import com.example.localconnect.model.Appointment;
+import com.example.localconnect.model.ServiceProvider; // Added import
+import com.example.localconnect.ui.adapter.AppointmentAdapter;
 
 import java.util.List;
 
 public class ProviderDashboardActivity extends AppCompatActivity {
 
-    private TextView tvApprovalStatus;
     private Switch switchAvailability;
-    private RecyclerView rvNotices;
+    private RecyclerView rvAppointments;
+    private AppointmentAdapter adapter;
+    private int providerId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_provider_dashboard);
 
-        tvApprovalStatus = findViewById(R.id.tvApprovalStatus);
+        com.example.localconnect.util.SessionManager sessionManager = new com.example.localconnect.util.SessionManager(
+                this);
+        providerId = sessionManager.getProviderId();
+        String providerName = sessionManager.getProviderName();
+
+        TextView tvTitle = findViewById(R.id.tvDashboardTitle);
+        tvTitle.setText("Welcome, " + providerName);
+
         switchAvailability = findViewById(R.id.switchAvailability);
-        rvNotices = findViewById(R.id.rvProviderNotices);
+        rvAppointments = findViewById(R.id.rvProviderAppointments);
+        Button btnLogout = findViewById(R.id.btnLogoutProvider);
 
-        rvNotices.setLayoutManager(new LinearLayoutManager(this));
+        rvAppointments.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new AppointmentAdapter();
+        rvAppointments.setAdapter(adapter);
 
-        // TODO: Load provider status from DB and update UI
-        // For now, assuming static status
+        btnLogout.setOnClickListener(v -> logout());
 
-        switchAvailability.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // TODO: Update availability in DB
-        });
+        loadProviderStatus(); // Load availability status
 
-        loadNotices();
+        switchAvailability.setOnCheckedChangeListener((buttonView, isChecked) -> updateAvailability(isChecked));
+
+        loadAppointments();
     }
 
-    private void loadNotices() {
-        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
-        String pincode = prefs.getString("provider_pincode", "");
-
-        NoticeAdapter adapter = new NoticeAdapter();
-        rvNotices.setAdapter(adapter);
-
+    private void loadProviderStatus() {
+        if (providerId == -1)
+            return;
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            List<Notice> notices = AppDatabase.getDatabase(getApplicationContext()).noticeDao()
-                    .getNoticesForUser(pincode);
+            ServiceProvider provider = AppDatabase.getDatabase(getApplicationContext()).providerDao()
+                    .getProviderById(providerId);
             runOnUiThread(() -> {
-                if (notices != null && !notices.isEmpty()) {
-                    adapter.setNotices(notices);
-                    rvNotices.setVisibility(View.VISIBLE);
-                } else {
-                    rvNotices.setVisibility(View.GONE);
+                if (provider != null) {
+                    // Avoid triggering listener during setup
+                    switchAvailability.setOnCheckedChangeListener(null);
+                    switchAvailability.setChecked(provider.isAvailable);
+                    switchAvailability
+                            .setOnCheckedChangeListener((buttonView, isChecked) -> updateAvailability(isChecked));
                 }
             });
         });
+    }
+
+    private void updateAvailability(boolean isAvailable) {
+        if (providerId == -1)
+            return;
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            AppDatabase.getDatabase(getApplicationContext()).providerDao().updateAvailability(providerId, isAvailable);
+            runOnUiThread(() -> Toast.makeText(this, "Availability Updated", Toast.LENGTH_SHORT).show());
+        });
+    }
+
+    private void loadAppointments() {
+        if (providerId == -1)
+            return;
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            List<Appointment> appointments = AppDatabase.getDatabase(getApplicationContext()).appointmentDao()
+                    .getAppointmentsForProvider(providerId);
+            runOnUiThread(() -> {
+                if (appointments != null) {
+                    adapter.setAppointments(appointments, new AppointmentAdapter.OnAppointmentActionListener() {
+                        @Override
+                        public void onAccept(Appointment appointment) {
+                            updateAppointmentStatus(appointment, "CONFIRMED");
+                        }
+
+                        @Override
+                        public void onReject(Appointment appointment) {
+                            updateAppointmentStatus(appointment, "REJECTED");
+                        }
+
+                        @Override
+                        public void onCall(String phone) {
+                            Intent intent = new Intent(Intent.ACTION_DIAL); // Use ACTION_DIAL to avoid immediate
+                                                                            // permission crash if not granted, or
+                                                                            // ACTION_CALL if checked
+                            intent.setData(Uri.parse("tel:" + phone));
+                            startActivity(intent);
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    private void updateAppointmentStatus(Appointment appointment, String status) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            AppDatabase.getDatabase(getApplicationContext()).appointmentDao().updateStatus(appointment.id, status);
+            runOnUiThread(() -> {
+                Toast.makeText(this, "Status Updated to " + status, Toast.LENGTH_SHORT).show();
+                loadAppointments(); // Reload to refresh UI
+            });
+        });
+    }
+
+    private void logout() {
+        new com.example.localconnect.util.SessionManager(this).logout();
+        Intent intent = new Intent(this, ProviderLoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

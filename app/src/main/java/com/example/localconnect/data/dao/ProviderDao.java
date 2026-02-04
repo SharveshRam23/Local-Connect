@@ -38,6 +38,9 @@ public interface ProviderDao {
     @Query("UPDATE service_providers SET isApproved = :isApproved, approvalTime = :approvalTime WHERE id = :id")
     void updateApprovalStatus(int id, boolean isApproved, long approvalTime);
 
+    @Query("UPDATE service_providers SET isAvailable = :isAvailable WHERE id = :id")
+    void updateAvailability(int id, boolean isAvailable);
+
     @Query("SELECT * FROM service_providers WHERE phone = :phone AND password = :password")
     ServiceProvider checkLogin(String phone, String password);
 

@@ -110,39 +110,13 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private void rejectProvider(com.example.localconnect.model.ServiceProvider provider,
             com.example.localconnect.ui.adapter.ProviderAdapter adapter) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            // For rejection, we might just delete them or set a rejected flag.
-            // The user said "On reject -> delete or mark rejected".
-            // I'll delete for simplicity as I didn't add a 'REJECTED' status enum, just
-            // boolean isApproved.
-            // Or I can add a method to delete. I need to check ProviderDao if delete
-            // exists.
-            // ProviderDao doesn't have delete method yet. I used @Update and @Insert.
-            // I will use updateApprovalStatus with false (stays false) but maybe I should
-            // have a way to distinguish?
-            // The user said "delete or mark rejected".
-            // Since I don't have delete method, I will assume marking rejected means
-            // keeping isApproved=false?
-            // But they are ALREADY false.
-            // I'll assume I need to Delete. But I can't delete without a delete method.
-            // I'll implement a delete action or just leave them pending/rejected.
-            // Actually, I'll just remove them from the list visually or implement delete in
-            // DAO now.
-            // Wait, I can't modify DAO in this file.
-            // I'll come back to DAO later if needed. For now, I'll just show a Toast and
-            // "Simulate" rejection by not changing status.
-            // OR, I can set approvalTime to -1 to signify rejection?
-            // Let's stick to "delete". I'll add @Delete to DAO in next step or now.
-            // I shouldn't leave the file half-baked.
-            // I'll make a helper to delete.
-            // BUT, I can't invoke a missing method.
-            // I'll mark them as "Rejected" by using a negative approval time or similar
-            // hack, or just delete.
-            // I'll ADD DELETE TO DAO in the next turn if I forgot.
-            // Checking ProviderDao content earlier... I only saw Insert/Update/Queries.
-            // I'll add `delete(ServiceProvider provider)` to DAO in the next step.
-            // For now, I will comment out the actual DAO call and put a TODO.
+            AppDatabase.getDatabase(getApplicationContext()).providerDao().delete(provider);
+            runOnUiThread(() -> {
+                Toast.makeText(this, "Provider Rejected (Deleted)", Toast.LENGTH_SHORT).show();
+                loadPendingProviders(adapter);
+            });
         });
-        Toast.makeText(this, "Rejection implemented in next step (DAO update needed)", Toast.LENGTH_SHORT).show();
+
     }
 
     private void showUsersDialog() {
