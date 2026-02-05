@@ -23,6 +23,12 @@ public class UserHomeActivity extends AppCompatActivity {
 
     private ActivityUserHomeBinding binding;
 
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.NoticeDao noticeDao;
+
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +39,10 @@ public class UserHomeActivity extends AppCompatActivity {
 
         binding.btnFindServices.setOnClickListener(v -> {
             startActivity(new Intent(UserHomeActivity.this, ServiceListActivity.class));
+        });
+
+        binding.btnViewBookings.setOnClickListener(v -> {
+            startActivity(new Intent(UserHomeActivity.this, MyBookingsActivity.class));
         });
 
         binding.btnReportIssue.setOnClickListener(v -> {
@@ -70,17 +80,47 @@ public class UserHomeActivity extends AppCompatActivity {
         NoticeAdapter adapter = new NoticeAdapter();
         binding.rvNotices.setAdapter(adapter);
 
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            List<Notice> notices = AppDatabase.getDatabase(getApplicationContext()).noticeDao()
-                    .getNoticesForUser(pincode);
-            runOnUiThread(() -> {
-                if (notices != null && !notices.isEmpty()) {
-                    adapter.setNotices(notices);
-                    binding.rvNotices.setVisibility(View.VISIBLE);
-                } else {
-                    binding.rvNotices.setVisibility(View.GONE);
-                }
-            });
-        });
+        // Fetch from Firestore
+        firestore.collection("notices")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Notice> notices = queryDocumentSnapshots.toObjects(Notice.class);
+                    if (!notices.isEmpty()) {
+                        adapter.setNotices(notices);
+                        binding.rvNotices.setVisibility(View.VISIBLE);
+                        // Sync to Room
+                        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                            for (Notice n : notices) noticeDao.insert(n);
+                        });
+                    } else {
+                        // Fallback to local Room
+                        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                            List<Notice> localNotices = noticeDao.getNoticesForUser(pincode);
+                            runOnUiThread(() -> {
+                                if (localNotices != null && !localNotices.isEmpty()) {
+                                    adapter.setNotices(localNotices);
+                                    binding.rvNotices.setVisibility(View.VISIBLE);
+                                } else {
+                                    binding.rvNotices.setVisibility(View.GONE);
+                                }
+                            });
+                        });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Firestore failed, try local
+                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                        List<Notice> localNotices = noticeDao.getNoticesForUser(pincode);
+                        runOnUiThread(() -> {
+                            if (localNotices != null && !localNotices.isEmpty()) {
+                                adapter.setNotices(localNotices);
+                                binding.rvNotices.setVisibility(View.VISIBLE);
+                            } else {
+                                binding.rvNotices.setVisibility(View.GONE);
+                            }
+                        });
+                    });
+                });
     }
 }

@@ -17,11 +17,18 @@ import com.example.localconnect.data.AppDatabase;
 import com.example.localconnect.model.ServiceProvider;
 import com.google.android.material.textfield.TextInputEditText;
 
+@dagger.hilt.android.AndroidEntryPoint
 public class ProviderRegistrationActivity extends AppCompatActivity {
 
     private TextInputEditText etName, etPhone, etPincode, etPassword, etExperience;
     private Spinner spinnerCategory;
     private Button btnRegister;
+
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
+
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.ProviderDao providerDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,13 +39,6 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
         etPhone = findViewById(R.id.etProviderPhone);
         etPincode = findViewById(R.id.etProviderPincode);
         etPassword = findViewById(R.id.etProviderPassword);
-        // Assuming the layout XML will be updated to include this ID.
-        // It is safer to assume I need to update XML too, but the user requested Java
-        // code.
-        // I will assume the XML has R.id.etProviderExperience or I need to add it.
-        // The user request demanded "Full Java code ... XML layouts".
-        // I haven't updated XML yet. I should do that.
-        // For now, I'll use the ID `etProviderExperience` and ensure I update XML next.
         etExperience = findViewById(R.id.etProviderExperience);
         spinnerCategory = findViewById(R.id.spinnerProviderCategory);
         btnRegister = findViewById(R.id.btnProviderRegister);
@@ -69,13 +69,37 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
             return;
         }
 
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            ServiceProvider provider = new ServiceProvider(name, category, pincode, phone, password, experience);
-            AppDatabase.getDatabase(getApplicationContext()).providerDao().insert(provider);
-            runOnUiThread(() -> {
-                Toast.makeText(this, "Registration Successful. Waiting for Admin Approval.", Toast.LENGTH_SHORT).show();
-                finish(); // Close registration, return to previous screen (likely Login or Main)
-            });
-        });
+        ServiceProvider provider = new ServiceProvider(name, category, pincode, phone, password, experience);
+
+        // First, check if provider exists in Firestore
+        firestore.collection("service_providers")
+                .whereEqualTo("phone", phone)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        Toast.makeText(this, "Provider already registered with this phone", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Save to Firestore
+                        firestore.collection("service_providers")
+                                .document(provider.id)
+                                .set(provider)
+                                .addOnSuccessListener(aVoid -> {
+                                    // Also save to local Room for sync
+                                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                                        providerDao.insert(provider);
+                                        runOnUiThread(() -> {
+                                            Toast.makeText(this, "Registration Successful. Waiting for Admin Approval.", Toast.LENGTH_SHORT).show();
+                                            finish();
+                                        });
+                                    });
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Firestore Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Registration failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 }

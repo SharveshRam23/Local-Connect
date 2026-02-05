@@ -21,13 +21,19 @@ public class AdminIssueListActivity extends AppCompatActivity {
     private RecyclerView rvIssues;
     private IssueAdapter adapter;
 
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.IssueDao issueDao;
+
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_issue_list);
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Reported Issues");
+            getSupportActionBar().setTitle("Reported Issues (Cloud)");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
@@ -49,19 +55,33 @@ public class AdminIssueListActivity extends AppCompatActivity {
     }
 
     private void loadAllIssues() {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            List<Issue> issues = AppDatabase.getDatabase(getApplicationContext())
-                    .issueDao().getAllIssues();
-            
-            runOnUiThread(() -> {
-                if (issues == null || issues.isEmpty()) {
-                    Toast.makeText(this, "No issues reported yet.", Toast.LENGTH_SHORT).show();
-                    adapter.setIssues(new java.util.ArrayList<>());
-                } else {
-                    adapter.setIssues(issues);
-                }
-            });
-        });
+        firestore.collection("issues")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Issue> issues = queryDocumentSnapshots.toObjects(Issue.class);
+                    if (!issues.isEmpty()) {
+                        adapter.setIssues(issues);
+                        // Sync to Room
+                        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                            for (Issue i : issues) issueDao.insert(i);
+                        });
+                    } else {
+                        // Fallback to local
+                        AppDatabase.databaseWriteExecutor.execute(() -> {
+                            List<Issue> localIssues = issueDao.getAllIssues();
+                            runOnUiThread(() -> {
+                                adapter.setIssues(localIssues != null ? localIssues : new java.util.ArrayList<>());
+                            });
+                        });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        List<Issue> localIssues = issueDao.getAllIssues();
+                        runOnUiThread(() -> adapter.setIssues(localIssues != null ? localIssues : new java.util.ArrayList<>()));
+                    });
+                });
     }
 
     @Override

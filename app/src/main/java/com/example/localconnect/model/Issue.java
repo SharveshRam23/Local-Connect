@@ -21,6 +21,7 @@ public class Issue {
     // Required for Firestore
     public Issue() {}
 
+    @Ignore
     public Issue(String id, String description, String imagePath, String pincode, long timestamp, String reporterName) {
         this.id = id;
         this.description = description;

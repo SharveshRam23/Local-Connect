@@ -10,6 +10,8 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.localconnect.R;
@@ -28,13 +30,19 @@ public class AdminIssueDetailActivity extends AppCompatActivity {
     private String issueId;
     private Issue currentIssue;
 
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.IssueDao issueDao;
+
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_issue_detail);
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Issue Details");
+            getSupportActionBar().setTitle("Issue Details (Cloud)");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
@@ -54,46 +62,91 @@ public class AdminIssueDetailActivity extends AppCompatActivity {
     }
 
     private void loadIssueDetails() {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            currentIssue = AppDatabase.getDatabase(getApplicationContext()).issueDao().getIssueById(issueId);
-            runOnUiThread(() -> {
-                if (currentIssue != null) {
-                    tvReporter.setText("Reporter: " + currentIssue.reporterName);
-                    tvDescription.setText(currentIssue.description);
-                    tvPincode.setText("Pincode: " + currentIssue.pincode);
-                    etReply.setText(currentIssue.adminResponse);
+        // Try Room first
+        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+            currentIssue = issueDao.getIssueById(issueId);
+            if (currentIssue != null) {
+                runOnUiThread(() -> populateUI());
+            }
 
-                    if (currentIssue.imagePath != null && !currentIssue.imagePath.isEmpty()) {
-                        ivImage.setImageBitmap(BitmapFactory.decodeFile(currentIssue.imagePath));
-                    }
-
-                    if ("PENDING".equals(currentIssue.status)) {
-                        ((RadioButton) findViewById(R.id.rbPending)).setChecked(true);
-                    } else if ("IN_PROGRESS".equals(currentIssue.status)) {
-                        ((RadioButton) findViewById(R.id.rbInProgress)).setChecked(true);
-                    } else if ("RESOLVED".equals(currentIssue.status)) {
-                        ((RadioButton) findViewById(R.id.rbResolved)).setChecked(true);
-                    }
-                }
-            });
+            // Sync from Firestore
+            firestore.collection("issues").document(issueId).get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        Issue issue = documentSnapshot.toObject(Issue.class);
+                        if (issue != null) {
+                            currentIssue = issue;
+                            populateUI();
+                            // Update Room
+                            com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> issueDao.insert(issue));
+                        }
+                    });
         });
     }
 
+    private void populateUI() {
+        if (currentIssue == null) return;
+        
+        tvReporter.setText("Reporter: " + currentIssue.reporterName);
+        tvDescription.setText(currentIssue.description);
+        tvPincode.setText("Pincode: " + currentIssue.pincode);
+        etReply.setText(currentIssue.adminResponse);
+
+        if (currentIssue.imagePath != null && !currentIssue.imagePath.isEmpty()) {
+            if (currentIssue.imagePath.startsWith("http")) {
+                Glide.with(this)
+                        .load(currentIssue.imagePath)
+                        .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(@androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                                Toast.makeText(AdminIssueDetailActivity.this, "Image Not Loaded: " + (e != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                                return false;
+                            }
+                        })
+                        .into(ivImage);
+            } else {
+                ivImage.setImageBitmap(BitmapFactory.decodeFile(currentIssue.imagePath));
+            }
+        }
+
+        if ("PENDING".equals(currentIssue.status)) {
+            ((RadioButton) findViewById(R.id.rbPending)).setChecked(true);
+        } else if ("IN_PROGRESS".equals(currentIssue.status)) {
+            ((RadioButton) findViewById(R.id.rbInProgress)).setChecked(true);
+        } else if ("RESOLVED".equals(currentIssue.status)) {
+            ((RadioButton) findViewById(R.id.rbResolved)).setChecked(true);
+        }
+    }
+
     private void updateIssue() {
+        if (currentIssue == null) return;
+
         String reply = etReply.getText().toString().trim();
         int selectedId = rgStatus.getCheckedRadioButtonId();
         String status = "PENDING";
         if (selectedId == R.id.rbInProgress) status = "IN_PROGRESS";
         else if (selectedId == R.id.rbResolved) status = "RESOLVED";
 
-        final String finalStatus = status;
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            AppDatabase.getDatabase(getApplicationContext()).issueDao().updateIssueStatus(issueId, finalStatus, reply);
-            runOnUiThread(() -> {
-                Toast.makeText(this, "Issue updated successfully", Toast.LENGTH_SHORT).show();
-                finish();
-            });
-        });
+        currentIssue.status = status;
+        currentIssue.adminResponse = reply;
+
+        firestore.collection("issues")
+                .document(issueId)
+                .set(currentIssue)
+                .addOnSuccessListener(aVoid -> {
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        issueDao.updateIssueStatus(issueId, currentIssue.status, currentIssue.adminResponse);
+                        runOnUiThread(() -> {
+                            Toast.makeText(this, "Issue updated in cloud!", Toast.LENGTH_SHORT).show();
+                            finish();
+                        });
+                    });
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     @Override

@@ -25,6 +25,8 @@ public class BookingActivity extends AppCompatActivity {
     com.example.localconnect.data.dao.BookingDao bookingDao;
     @javax.inject.Inject
     com.example.localconnect.data.dao.ProviderDao providerDao;
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,13 +87,32 @@ public class BookingActivity extends AppCompatActivity {
             }
         }
 
-        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
-            Booking booking = new Booking(userId, providerId, workType, date + " " + time, details);
-            bookingDao.insert(booking);
-            runOnUiThread(() -> {
-                Toast.makeText(this, "Booking Requested Successfully!", Toast.LENGTH_LONG).show();
-                finish();
-            });
-        });
+        Booking booking = new Booking(userId, providerId, workType, date + " " + time, details);
+        
+        // Save to Firestore
+        firestore.collection("bookings")
+                .document(booking.id)
+                .set(booking)
+                .addOnSuccessListener(aVoid -> {
+                    // Sync to local Room
+                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                        bookingDao.insert(booking);
+                        runOnUiThread(() -> {
+                            Toast.makeText(this, "Booking Requested and synced to cloud!", Toast.LENGTH_LONG).show();
+                            
+                            // Notify provider (simulated local)
+                            com.example.localconnect.util.BookingNotificationHelper.showNotification(
+                                this, 
+                                "New Booking Request", 
+                                "You have a new request for " + workType
+                            );
+                            
+                            finish();
+                        });
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Firestore Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 }

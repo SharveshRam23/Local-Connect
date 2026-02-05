@@ -19,6 +19,7 @@ public class Notice {
     // Required for Firestore
     public Notice() {}
 
+    @Ignore
     public Notice(String id, String title, String content, String type, String targetPincode, long scheduledTime) {
         this.id = id;
         this.title = title;

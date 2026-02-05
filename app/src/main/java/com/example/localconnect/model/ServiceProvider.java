@@ -24,9 +24,14 @@ public class ServiceProvider {
     public String availableFrom;
     public String availableTo;
 
+    // Rating fields
+    public float rating; // Average rating (0-5)
+    public int ratingCount; // Number of ratings
+
     // Required for Firestore
     public ServiceProvider() {}
 
+    @Ignore
     public ServiceProvider(String id, String name, String category, String pincode, String phone, String password,
             String experience) {
         this.id = id;
@@ -41,6 +46,8 @@ public class ServiceProvider {
         this.approvalTime = 0;
         this.availableFrom = "09:00"; // Default
         this.availableTo = "18:00"; // Default
+        this.rating = 0.0f; // Default no rating
+        this.ratingCount = 0; // Default no ratings
     }
 
     @Ignore

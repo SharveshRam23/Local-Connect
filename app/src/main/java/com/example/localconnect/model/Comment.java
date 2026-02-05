@@ -19,6 +19,7 @@ public class Comment {
     // Required for Firestore
     public Comment() {}
 
+    @Ignore
     public Comment(String id, String noticeId, String userId, String userName, String content, long timestamp) {
         this.id = id;
         this.noticeId = noticeId;

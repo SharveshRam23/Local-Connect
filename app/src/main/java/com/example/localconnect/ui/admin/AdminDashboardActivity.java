@@ -26,6 +26,18 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class AdminDashboardActivity extends AppCompatActivity {
 
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.UserDao userDao;
+
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.ProviderDao providerDao;
+
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.NoticeDao noticeDao;
+
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
+
     private Button btnApproveProviders, btnPostNotice;
     private RecyclerView rvNotices;
     private NoticeAdapter adapter;
@@ -76,19 +88,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         RecyclerView rvProviders = new RecyclerView(this);
         rvProviders.setLayoutManager(new LinearLayoutManager(this));
-        ProviderAdapter providerAdapter = new ProviderAdapter(new ProviderAdapter.OnAdminActionListener() {
-            @Override
-            public void onApprove(ServiceProvider provider) {
-                approveProvider(provider, null); // The second param is not used in the new implementation as effectively
-                // But wait, the original code passes 'adapter' to approve/reject to reload.
-            }
-
-            @Override
-            public void onReject(ServiceProvider provider) {
-                rejectProvider(provider, null);
-            }
-        });
-        // Actually, let's keep the helper methods and just fix the instantiation.
         ProviderAdapter finalAdapter = new ProviderAdapter(new ProviderAdapter.OnAdminActionListener() {
             @Override
             public void onApprove(ServiceProvider provider) {
@@ -112,71 +111,98 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     private void loadPendingProviders(ProviderAdapter adapter) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            List<ServiceProvider> pendingProviders = AppDatabase
-                    .getDatabase(getApplicationContext())
-                    .providerDao().getPendingProviders();
-
-            runOnUiThread(() -> {
-                if (pendingProviders == null || pendingProviders.isEmpty()) {
-                    Toast.makeText(this, "No pending providers.", Toast.LENGTH_SHORT).show();
-                    adapter.setProviders(new java.util.ArrayList<>());
-                } else {
-                    adapter.setProviders(pendingProviders);
-                }
-            });
-        });
+        // First try Firestore
+        firestore.collection("service_providers")
+                .whereEqualTo("isApproved", false)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<ServiceProvider> pendingList = queryDocumentSnapshots.toObjects(ServiceProvider.class);
+                    if (pendingList.isEmpty()) {
+                        // Fallback/Sync from Room
+                        AppDatabase.databaseWriteExecutor.execute(() -> {
+                            List<ServiceProvider> roomPending = providerDao.getPendingProviders();
+                            runOnUiThread(() -> {
+                                adapter.setProviders(roomPending != null ? roomPending : new java.util.ArrayList<>());
+                            });
+                        });
+                    } else {
+                        adapter.setProviders(pendingList);
+                        // Sync to Room
+                        AppDatabase.databaseWriteExecutor.execute(() -> {
+                            for (ServiceProvider p : pendingList) providerDao.insert(p);
+                        });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        List<ServiceProvider> roomPending = providerDao.getPendingProviders();
+                        runOnUiThread(() -> adapter.setProviders(roomPending != null ? roomPending : new java.util.ArrayList<>()));
+                    });
+                });
     }
 
     private void approveProvider(ServiceProvider provider, ProviderAdapter adapter) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            AppDatabase.getDatabase(getApplicationContext()).providerDao().updateApprovalStatus(provider.id, true,
-                    System.currentTimeMillis());
-            runOnUiThread(() -> {
-                Toast.makeText(this, "Provider Approved!", Toast.LENGTH_SHORT).show();
-                com.example.localconnect.util.NotificationUtil.showApprovalNotification(this, "Provider Approved",
-                        "Approved " + provider.name);
+        provider.isApproved = true;
+        provider.approvalTime = System.currentTimeMillis();
 
-                if (adapter != null) loadPendingProviders(adapter);
-            });
-        });
+        firestore.collection("service_providers")
+                .document(provider.id)
+                .set(provider)
+                .addOnSuccessListener(aVoid -> {
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        providerDao.updateApprovalStatus(provider.id, true, provider.approvalTime);
+                        runOnUiThread(() -> {
+                            Toast.makeText(this, "Provider Approved!", Toast.LENGTH_SHORT).show();
+                            com.example.localconnect.util.NotificationUtil.showApprovalNotification(this, "Provider Approved",
+                                    "Approved " + provider.name);
+                            if (adapter != null) loadPendingProviders(adapter);
+                        });
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Approval failed (Firestore): " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void rejectProvider(ServiceProvider provider, ProviderAdapter adapter) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            AppDatabase.getDatabase(getApplicationContext()).providerDao().delete(provider);
-            runOnUiThread(() -> {
-                Toast.makeText(this, "Provider Rejected (Deleted)", Toast.LENGTH_SHORT).show();
-                if (adapter != null) loadPendingProviders(adapter);
-            });
-        });
+        firestore.collection("service_providers")
+                .document(provider.id)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        providerDao.delete(provider);
+                        runOnUiThread(() -> {
+                            Toast.makeText(this, "Provider Rejected (Deleted)", Toast.LENGTH_SHORT).show();
+                            if (adapter != null) loadPendingProviders(adapter);
+                        });
+                    });
+                });
     }
 
     private void showUsersDialog() {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            List<com.example.localconnect.model.User> users = AppDatabase.getDatabase(getApplicationContext()).userDao()
-                    .getAllUsers();
-            runOnUiThread(() -> {
-                if (users == null || users.isEmpty()) {
-                    Toast.makeText(this, "No users registered yet.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        firestore.collection("users")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<com.example.localconnect.model.User> users = queryDocumentSnapshots.toObjects(com.example.localconnect.model.User.class);
+                    if (users.isEmpty()) {
+                        Toast.makeText(this, "No users found in Firestore.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-                StringBuilder sb = new StringBuilder();
-                for (com.example.localconnect.model.User user : users) {
-                    sb.append("Name: ").append(user.name)
-                            .append("\nPhone: ").append(user.phone)
-                            .append("\nPincode: ").append(user.pincode)
-                            .append("\n\n");
-                }
+                    StringBuilder sb = new StringBuilder();
+                    for (com.example.localconnect.model.User user : users) {
+                        sb.append("Name: ").append(user.name)
+                                .append("\nPhone: ").append(user.phone)
+                                .append("\nPincode: ").append(user.pincode)
+                                .append("\n\n");
+                    }
 
-                new AlertDialog.Builder(this)
-                        .setTitle("Registered Users")
-                        .setMessage(sb.toString())
-                        .setPositiveButton("Close", null)
-                        .show();
-            });
-        });
+                    new AlertDialog.Builder(this)
+                            .setTitle("Registered Users (Cloud)")
+                            .setMessage(sb.toString())
+                            .setPositiveButton("Close", null)
+                            .show();
+                });
     }
 
     private void showPostNoticeDialog() {
@@ -191,12 +217,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         builder.setPositiveButton("Post", (dialog, which) -> {
             String content = input.getText().toString().trim();
             if (!content.isEmpty()) {
-                if (checkSmsPermission()) {
-                    postNotice(content);
-                } else {
-                    requestSmsPermission();
-                    postNotice(content);
-                }
+                postNotice(content);
             } else {
                 Toast.makeText(this, "Announcement cannot be empty", Toast.LENGTH_SHORT).show();
             }
@@ -217,36 +238,37 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     private void postNotice(String content) {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            Notice notice = new Notice("Announcement", content, "GLOBAL", null,
-                    System.currentTimeMillis());
-            AppDatabase.getDatabase(getApplicationContext()).noticeDao().insert(notice);
+        String id = java.util.UUID.randomUUID().toString();
+        Notice notice = new Notice(id, "Announcement", content, "GLOBAL", null,
+                System.currentTimeMillis());
 
-            // Broadcast SMS
-            if (checkSmsPermission()) {
-                try {
-                    List<String> phoneNumbers = AppDatabase.getDatabase(getApplicationContext()).userDao()
-                            .getAllUserPhones();
-                    android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
-                    for (String phone : phoneNumbers) {
-                        if (phone != null && !phone.isEmpty()) {
+        firestore.collection("notices")
+                .document(id)
+                .set(notice)
+                .addOnSuccessListener(aVoid -> {
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        noticeDao.insert(notice);
+                        
+                        // Broadcast SMS logic
+                        if (checkSmsPermission()) {
                             try {
-                                smsManager.sendTextMessage(phone, null, "LocalConnect: " + content, null, null);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                                List<String> phoneNumbers = userDao.getAllUserPhones();
+                                android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
+                                for (String phone : phoneNumbers) {
+                                    if (phone != null && !phone.isEmpty()) {
+                                        smsManager.sendTextMessage(phone, null, "LocalConnect: " + content, null, null);
+                                    }
+                                }
+                            } catch (Exception e) { e.printStackTrace(); }
                         }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
 
-            runOnUiThread(() -> {
-                Toast.makeText(this, "Announcement Posted & SMS Sent", Toast.LENGTH_SHORT).show();
-                loadNotices();
-            });
-        });
+                        runOnUiThread(() -> {
+                            Toast.makeText(this, "Announcement Posted & Cloud Synced", Toast.LENGTH_SHORT).show();
+                            loadNotices();
+                        });
+                    });
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Failed to post notice: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     @Override
@@ -263,13 +285,18 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     private void loadNotices() {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            List<Notice> notices = AppDatabase.getDatabase(getApplicationContext()).noticeDao().getAllNotices();
-            runOnUiThread(() -> {
-                if (notices != null) {
-                    adapter.setNotices(notices);
-                }
-            });
-        });
+        firestore.collection("notices")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Notice> notices = queryDocumentSnapshots.toObjects(Notice.class);
+                    if (!notices.isEmpty()) {
+                        adapter.setNotices(notices);
+                        // Sync to Room
+                        AppDatabase.databaseWriteExecutor.execute(() -> {
+                            for (Notice n : notices) noticeDao.insert(n);
+                        });
+                    }
+                });
     }
 }

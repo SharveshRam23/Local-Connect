@@ -2,6 +2,7 @@ package com.example.localconnect.data.dao;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -11,7 +12,7 @@ import java.util.List;
 
 @Dao
 public interface ProviderDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(ServiceProvider provider);
 
     @Update
@@ -46,4 +47,7 @@ public interface ProviderDao {
 
     @Query("SELECT * FROM service_providers WHERE id = :id")
     ServiceProvider getProviderById(String id);
+
+    @Query("UPDATE service_providers SET rating = :rating, ratingCount = :count WHERE id = :id")
+    void updateRating(String id, float rating, int count);
 }

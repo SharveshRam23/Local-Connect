@@ -40,11 +40,12 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/btnRotate"
+        android:id="@+id/btnEditImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Rotate Image 90°"
+        android:text="Edit Image (Crop/Filters)"
         android:layout_marginBottom="16dp"
+        android:visibility="gone"
         style="@style/Widget.MaterialComponents.Button.TextButton"/>
 
     <com.google.android.material.textfield.TextInputLayout

@@ -29,6 +29,9 @@ public class UserRegistrationActivity extends AppCompatActivity {
     @javax.inject.Inject
     com.example.localconnect.data.dao.UserDao userDao;
 
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,27 +97,51 @@ public class UserRegistrationActivity extends AppCompatActivity {
             return;
         }
 
-        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
-            User user = new User(name, phone, pincode, password);
-            userDao.insert(user);
-            runOnUiThread(() -> {
-                Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show();
+        User user = new User(name, phone, pincode, password);
 
-                // Save user info to SharedPreferences
-                SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
-                prefs.edit()
-                        .putString("user_pincode", pincode)
-                        .putString("user_name", name)
-                        .putString("user_phone", phone)
-                        .putString("user_id", user.id)
-                        .putBoolean("is_user_login", true)
-                        .apply();
+        // First, check if user exists in Firestore
+        firestore.collection("users")
+                .whereEqualTo("phone", phone)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        Toast.makeText(this, "User already registered with this phone", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Save to Firestore
+                        firestore.collection("users")
+                                .document(user.id)
+                                .set(user)
+                                .addOnSuccessListener(aVoid -> {
+                                    // Also save to local Room for sync (and fast access)
+                                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                                        userDao.insert(user);
+                                        runOnUiThread(() -> {
+                                            Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(UserRegistrationActivity.this, UserHomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
-            });
-        });
+                                            // Save user info to SharedPreferences
+                                            SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+                                            prefs.edit()
+                                                    .putString("user_pincode", pincode)
+                                                    .putString("user_name", name)
+                                                    .putString("user_phone", phone)
+                                                    .putString("user_id", user.id)
+                                                    .putBoolean("is_user_login", true)
+                                                    .apply();
+
+                                            Intent intent = new Intent(UserRegistrationActivity.this, UserHomeActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                            finish();
+                                        });
+                                    });
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Firestore Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Registration failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 }

@@ -27,12 +27,23 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.UUID;
 
+@dagger.hilt.android.AndroidEntryPoint
 public class ReportIssueActivity extends AppCompatActivity {
 
     private ImageView imageView;
-    private Button btnCamera, btnGallery, btnRotate, btnSubmit;
+    private Button btnCamera, btnGallery, btnEditImage, btnSubmit;
     private EditText etDescription;
     private Bitmap currentBitmap;
+    private Uri currentImageUri;
+
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.IssueDao issueDao;
+
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
+
+    @javax.inject.Inject
+    com.google.firebase.storage.FirebaseStorage firebaseStorage;
 
     // Camera Launcher
     private final ActivityResultLauncher<Intent> cameraLauncher =
@@ -46,6 +57,33 @@ public class ReportIssueActivity extends AppCompatActivity {
                                 if (bitmap != null) {
                                     currentBitmap = ImageUtil.resize(bitmap, 800, 800);
                                     imageView.setImageBitmap(currentBitmap);
+                                    
+                                    // Save to temp file to get a URI for the editor
+                                    File tempFile = new File(getCacheDir(), "camera_temp.jpg");
+                                    String path = ImageUtil.compressImage(currentBitmap, tempFile);
+                                    if (path != null) {
+                                        currentImageUri = Uri.fromFile(new File(path));
+                                        btnEditImage.setVisibility(android.view.View.VISIBLE);
+                                    }
+                                }
+                            }
+                        }
+                    }
+            );
+
+    private final ActivityResultLauncher<Intent> editLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                            String uriString = result.getData().getStringExtra("edited_image_uri");
+                            if (uriString != null) {
+                                currentImageUri = Uri.parse(uriString);
+                                try {
+                                    currentBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), currentImageUri);
+                                    imageView.setImageBitmap(currentBitmap);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
                             }
                         }
@@ -58,6 +96,7 @@ public class ReportIssueActivity extends AppCompatActivity {
                     new ActivityResultContracts.GetContent(),
                     uri -> {
                         if (uri != null) {
+                            currentImageUri = uri;
                             try {
                                 // Save to temp file to use ImageUtil path-based decoding
                                 File tempFile = new File(getCacheDir(), "temp_image.jpg");
@@ -72,6 +111,7 @@ public class ReportIssueActivity extends AppCompatActivity {
 
                                 currentBitmap = ImageUtil.decodeSampledBitmapFromPath(tempFile.getAbsolutePath(), 800, 800);
                                 imageView.setImageBitmap(currentBitmap);
+                                btnEditImage.setVisibility(android.view.View.VISIBLE);
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
@@ -101,18 +141,17 @@ public class ReportIssueActivity extends AppCompatActivity {
         imageView = findViewById(R.id.issueImage);
         btnCamera = findViewById(R.id.btnCapture);
         btnGallery = findViewById(R.id.btnGallery);
-        btnRotate = findViewById(R.id.btnRotate);
+        btnEditImage = findViewById(R.id.btnEditImage);
         btnSubmit = findViewById(R.id.btnSubmitIssue);
         etDescription = findViewById(R.id.etDescription);
 
         btnCamera.setOnClickListener(v -> checkPermissionAndLaunch());
         btnGallery.setOnClickListener(v -> galleryLauncher.launch("image/*"));
-        btnRotate.setOnClickListener(v -> {
-            if (currentBitmap != null) {
-                currentBitmap = ImageUtil.rotate(currentBitmap, 90f);
-                imageView.setImageBitmap(currentBitmap);
-            } else {
-                Toast.makeText(this, "No image to rotate", Toast.LENGTH_SHORT).show();
+        btnEditImage.setOnClickListener(v -> {
+            if (currentImageUri != null) {
+                Intent intent = new Intent(this, ImageEditorActivity.class);
+                intent.putExtra("image_uri", currentImageUri.toString());
+                editLauncher.launch(intent);
             }
         });
         btnSubmit.setOnClickListener(v -> submitIssue());
@@ -144,29 +183,65 @@ public class ReportIssueActivity extends AppCompatActivity {
             return;
         }
 
+        btnSubmit.setEnabled(false);
+        btnSubmit.setText("Uploading...");
+
         // Get user session
         SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
         String pincode = prefs.getString("user_pincode", "000000");
         String reporterName = prefs.getString("user_name", "Anonymous");
 
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            // Save compressed image
-            String fileName = "issue_" + UUID.randomUUID().toString() + ".jpg";
-            File file = new File(getExternalFilesDir(null), fileName);
-            String imagePath = ImageUtil.compressImage(currentBitmap, file);
-            
-            if (imagePath != null) {
-                Issue issue = new Issue(description, imagePath, pincode, System.currentTimeMillis(), reporterName);
-                AppDatabase.getDatabase(getApplicationContext()).issueDao().insert(issue);
+        // Save compressed image locally first
+        String id = UUID.randomUUID().toString();
+        String fileName = "issue_" + id + ".jpg";
+        File file = new File(getExternalFilesDir(null), fileName);
+        String imagePath = ImageUtil.compressImage(currentBitmap, file);
 
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "Issue reported successfully!", Toast.LENGTH_LONG).show();
-                    finish();
+        if (imagePath == null) {
+            Toast.makeText(this, "Failed to compress image", Toast.LENGTH_SHORT).show();
+            btnSubmit.setEnabled(true);
+            btnSubmit.setText("Submit Issue");
+            return;
+        }
+
+        // Upload to Firebase Storage
+        com.google.firebase.storage.StorageReference ref = firebaseStorage.getReference()
+                .child("issue_images/" + id + ".jpg");
+
+        ref.putFile(Uri.fromFile(new File(imagePath)))
+                .addOnSuccessListener(taskSnapshot -> {
+                    ref.getDownloadUrl().addOnSuccessListener(uri -> {
+                        String cloudImageUrl = uri.toString();
+                        
+                        // Create Issue object with cloud URL
+                        Issue issue = new Issue(id, description, cloudImageUrl, pincode, System.currentTimeMillis(), reporterName);
+                        
+                        // Save to Firestore
+                        firestore.collection("issues")
+                                .document(id)
+                                .set(issue)
+                                .addOnSuccessListener(aVoid -> {
+                                    // Sync to local Room
+                                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                                        issueDao.insert(issue);
+                                        runOnUiThread(() -> {
+                                            Toast.makeText(this, "Issue reported and synced to cloud!", Toast.LENGTH_LONG).show();
+                                            finish();
+                                        });
+                                    });
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Firestore Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    btnSubmit.setEnabled(true);
+                                    btnSubmit.setText("Submit Issue");
+                                });
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Storage Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    btnSubmit.setEnabled(true);
+                    btnSubmit.setText("Submit Issue");
                 });
-            } else {
-                 runOnUiThread(() -> Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show());
-            }
-        });
     }
 
     // Removed old saveImageLocally as ImageUtil.compressImage handles it

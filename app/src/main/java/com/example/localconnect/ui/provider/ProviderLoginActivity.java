@@ -26,6 +26,9 @@ public class ProviderLoginActivity extends AppCompatActivity {
     @javax.inject.Inject
     com.example.localconnect.data.dao.ProviderDao providerDao;
 
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,40 +46,73 @@ public class ProviderLoginActivity extends AppCompatActivity {
     }
 
     private void loginProvider() {
-        String phone = etPhone.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
+        String phoneInput = etPhone.getText().toString().trim();
+        String passwordInput = etPassword.getText().toString().trim();
 
-        if (TextUtils.isEmpty(phone) || TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(phoneInput) || TextUtils.isEmpty(passwordInput)) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
-            try {
-                ServiceProvider provider = providerDao.checkLogin(phone, password);
-
-                runOnUiThread(() -> {
-                    if (provider != null) {
-                        if (provider.isApproved) {
-                            // Login Success
-                            com.example.localconnect.util.SessionManager sessionManager = new com.example.localconnect.util.SessionManager(this);
-                            sessionManager.createProviderSession(provider.id, provider.name, provider.pincode);
-
-                            Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(ProviderLoginActivity.this, ProviderDashboardActivity.class);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            Toast.makeText(this, "Account pending approval. Please wait for Admin.", Toast.LENGTH_LONG)
-                                    .show();
+        // Search in Firestore
+        firestore.collection("service_providers")
+                .whereEqualTo("phone", phoneInput)
+                .whereEqualTo("password", passwordInput)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        ServiceProvider provider = queryDocumentSnapshots.getDocuments().get(0).toObject(ServiceProvider.class);
+                        if (provider != null) {
+                            // Sync to Room
+                            com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                                providerDao.insert(provider);
+                                runOnUiThread(() -> {
+                                    handleLoginSuccess(provider);
+                                });
+                            });
                         }
                     } else {
-                        Toast.makeText(this, "Invalid Phone or Password", Toast.LENGTH_SHORT).show();
+                        // Fallback to local Room
+                        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                            ServiceProvider localProvider = providerDao.checkLogin(phoneInput, passwordInput);
+                            runOnUiThread(() -> {
+                                if (localProvider != null) {
+                                    handleLoginSuccess(localProvider);
+                                } else {
+                                    Toast.makeText(this, "Invalid Phone or Password", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        });
                     }
+                })
+                .addOnFailureListener(e -> {
+                    // Firestore failed, try local
+                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                        ServiceProvider localProvider = providerDao.checkLogin(phoneInput, passwordInput);
+                        runOnUiThread(() -> {
+                            if (localProvider != null) {
+                                handleLoginSuccess(localProvider);
+                            } else {
+                                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    });
                 });
-            } catch (Exception e) {
-                runOnUiThread(() -> Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-            }
-        });
+    }
+
+    private void handleLoginSuccess(ServiceProvider provider) {
+        if (provider.isApproved) {
+            // Login Success
+            com.example.localconnect.util.SessionManager sessionManager = new com.example.localconnect.util.SessionManager(this);
+            sessionManager.createProviderSession(provider.id, provider.name, provider.pincode);
+
+            Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(ProviderLoginActivity.this, ProviderDashboardActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            Toast.makeText(this, "Account pending approval. Please wait for Admin.", Toast.LENGTH_LONG)
+                    .show();
+        }
     }
 }

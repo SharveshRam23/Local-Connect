@@ -20,6 +20,7 @@ public class Booking {
     // Required for Firestore
     public Booking() {}
 
+    @Ignore
     public Booking(String id, String userId, String providerId, String workType, String date, String details) {
         this.id = id;
         this.userId = userId;

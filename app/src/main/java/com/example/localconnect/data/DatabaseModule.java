@@ -6,6 +6,7 @@ import com.example.localconnect.data.dao.BookingDao;
 import com.example.localconnect.data.dao.IssueDao;
 import com.example.localconnect.data.dao.NoticeDao;
 import com.example.localconnect.data.dao.ProviderDao;
+import com.example.localconnect.data.dao.RatingDao;
 import com.example.localconnect.data.dao.UserDao;
 
 import javax.inject.Singleton;
@@ -54,5 +55,10 @@ public class DatabaseModule {
     @Provides
     public com.example.localconnect.data.dao.CommentDao provideCommentDao(AppDatabase database) {
         return database.commentDao();
+    }
+
+    @Provides
+    public RatingDao provideRatingDao(AppDatabase database) {
+        return database.ratingDao();
     }
 }

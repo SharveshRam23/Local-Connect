@@ -26,13 +26,27 @@ public class NoticeWorker extends Worker {
             SharedPreferences prefs = getApplicationContext().getSharedPreferences("local_connect_prefs",
                     Context.MODE_PRIVATE);
             long lastCheckTime = prefs.getLong("last_notice_check_time", 0);
-            String userPincode = prefs.getString("user_pincode", "000000"); // Get actual pincode (mock for now or from session)
-
-            // Simulate fetching new notices for this area
-            // In a real app, we would call an API or check DB for notices > lastCheckTime
             
-            // For demo, we just remind them occasionally if they assume "new" content
-            sendNotification("Local Connect", "Check for new announcements in " + userPincode + "!");
+            // Check Firestore for new notices since lastCheckTime
+            com.google.firebase.firestore.FirebaseFirestore firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance();
+            firestore.collection("notices")
+                    .whereGreaterThan("timestamp", lastCheckTime)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            int newCount = queryDocumentSnapshots.size();
+                            sendNotification("Local Connect", "You have " + newCount + " new announcement(s)!");
+                            
+                            // Also sync to local database
+                            com.example.localconnect.data.AppDatabase db = com.example.localconnect.data.AppDatabase.getDatabase(getApplicationContext());
+                            com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                                for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                                    com.example.localconnect.model.Notice notice = doc.toObject(com.example.localconnect.model.Notice.class);
+                                    if (notice != null) db.noticeDao().insert(notice);
+                                }
+                            });
+                        }
+                    });
 
             // Updating check time
             prefs.edit().putLong("last_notice_check_time", System.currentTimeMillis()).apply();

@@ -32,8 +32,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
@@ -52,6 +52,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-storage")
 
     // Room (To be removed later, kept for now until full migration)
     implementation(libs.room.runtime)
@@ -60,6 +61,12 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     annotationProcessor(libs.hilt.android.compiler)
+    
+    // Image editing
+    implementation("com.github.yalantis:ucrop:2.2.8") // Crop
+    implementation("jp.co.cyberagent.android:gpuimage:2.1.0") // Filters
+    implementation("com.github.bumptech.glide:glide:4.16.0") // Image loading
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
     
     // Guava for ListenableFuture (required by WorkManager)
     implementation("com.google.guava:guava:31.1-android")

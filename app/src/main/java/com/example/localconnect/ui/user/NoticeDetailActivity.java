@@ -39,6 +39,9 @@ public class NoticeDetailActivity extends AppCompatActivity {
     @javax.inject.Inject
     com.example.localconnect.data.dao.CommentDao commentDao;
 
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
+
     private CommentAdapter adapter;
 
     @Override
@@ -80,10 +83,24 @@ public class NoticeDetailActivity extends AppCompatActivity {
     }
 
     private void loadComments() {
-        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
-            List<Comment> comments = commentDao.getCommentsForNotice(noticeId);
-            runOnUiThread(() -> adapter.setComments(comments));
-        });
+        firestore.collection("notices").document(noticeId).collection("comments")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.ASCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Comment> comments = queryDocumentSnapshots.toObjects(Comment.class);
+                    adapter.setComments(comments);
+                    // Sync to local
+                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                        for (Comment c : comments) commentDao.insert(c);
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    // Fallback to local
+                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                        List<Comment> localComments = commentDao.getCommentsForNotice(noticeId);
+                        runOnUiThread(() -> adapter.setComments(localComments));
+                    });
+                });
     }
 
     private void postComment() {
@@ -92,19 +109,30 @@ public class NoticeDetailActivity extends AppCompatActivity {
 
         SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
         String userId = prefs.getString("user_id", null);
+        if (userId == null) userId = prefs.getString("provider_id", null); // Could be provider
         String userName = prefs.getString("user_name", "Anonymous");
+        if (userName.equals("Anonymous")) userName = prefs.getString("provider_name", "Anonymous");
 
         if (userId == null) {
             Toast.makeText(this, "You must be logged in to comment", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
-            Comment comment = new Comment(noticeId, userId, userName, content, System.currentTimeMillis());
-            commentDao.insert(comment);
-            binding.etComment.setText("");
-            loadComments(); // Refresh
-        });
+        Comment comment = new Comment(noticeId, userId, userName, content, System.currentTimeMillis());
+        
+        firestore.collection("notices").document(noticeId).collection("comments")
+                .document(comment.id)
+                .set(comment)
+                .addOnSuccessListener(aVoid -> {
+                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                        commentDao.insert(comment);
+                        runOnUiThread(() -> {
+                            binding.etComment.setText("");
+                            loadComments(); // Refresh
+                        });
+                    });
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Comment failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     // Inner Adapter Class

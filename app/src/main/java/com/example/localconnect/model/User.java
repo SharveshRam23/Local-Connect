@@ -18,6 +18,7 @@ public class User {
     // Required for Firestore
     public User() {}
 
+    @Ignore
     public User(String id, String name, String phone, String pincode, String password) {
         this.id = id;
         this.name = name;

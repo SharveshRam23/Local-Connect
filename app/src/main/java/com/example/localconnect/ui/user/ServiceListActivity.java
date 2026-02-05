@@ -23,6 +23,11 @@ public class ServiceListActivity extends AppCompatActivity {
 
     private ActivityServiceListBinding binding;
     private ProviderAdapter adapter;
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.ProviderDao providerDao;
+
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,38 +70,70 @@ public class ServiceListActivity extends AppCompatActivity {
     }
 
     private void loadAllProviders() {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            List<ServiceProvider> providers = AppDatabase.getDatabase(getApplicationContext())
-                    .providerDao().getAllApprovedProviders();
-            runOnUiThread(() -> adapter.setProviders(providers));
-        });
+        firestore.collection("service_providers")
+                .whereEqualTo("isApproved", true)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<ServiceProvider> providers = queryDocumentSnapshots.toObjects(ServiceProvider.class);
+                    if (!providers.isEmpty()) {
+                        adapter.setProviders(providers);
+                        // Sync to Room
+                        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                            for (ServiceProvider p : providers) providerDao.insert(p);
+                        });
+                    } else {
+                        // Fallback to local
+                        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                            List<ServiceProvider> localProviders = providerDao.getAllApprovedProviders();
+                            runOnUiThread(() -> adapter.setProviders(localProviders));
+                        });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                        List<ServiceProvider> localProviders = providerDao.getAllApprovedProviders();
+                        runOnUiThread(() -> adapter.setProviders(localProviders));
+                    });
+                });
     }
 
     private void filterProviders() {
         String category = binding.spinnerCategory.getSelectedItem().toString();
         String pincode = binding.etFilterPincode.getText().toString().trim();
 
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            List<ServiceProvider> providers;
-            if (category.equals("All")) {
-                if (pincode.isEmpty()) {
-                    providers = AppDatabase.getDatabase(getApplicationContext()).providerDao().getAllApprovedProviders();
-                } else {
-                    providers = AppDatabase.getDatabase(getApplicationContext()).providerDao().getProvidersByPincode(pincode);
-                }
-            } else {
-                if (pincode.isEmpty()) {
-                    providers = AppDatabase.getDatabase(getApplicationContext()).providerDao().getProvidersByCategory(category);
-                } else {
-                    providers = AppDatabase.getDatabase(getApplicationContext()).providerDao().getProvidersByCategoryAndPincode(category, pincode);
-                }
-            }
-            runOnUiThread(() -> {
-                adapter.setProviders(providers);
-                if (providers.isEmpty()) {
-                    Toast.makeText(this, "No providers found", Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
+        com.google.firebase.firestore.Query query = firestore.collection("service_providers")
+                .whereEqualTo("isApproved", true);
+
+        if (!category.equals("All")) {
+            query = query.whereEqualTo("category", category);
+        }
+        if (!pincode.isEmpty()) {
+            query = query.whereEqualTo("pincode", pincode);
+        }
+
+        query.get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<ServiceProvider> providers = queryDocumentSnapshots.toObjects(ServiceProvider.class);
+                    adapter.setProviders(providers);
+                    if (providers.isEmpty()) {
+                        Toast.makeText(this, "No matching providers found in cloud", Toast.LENGTH_SHORT).show();
+                    }
+                    // Sync results to room for offline fallback
+                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                        for (ServiceProvider p : providers) providerDao.insert(p);
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    // Fallback to local Room filtering
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        List<ServiceProvider> localProviders;
+                        if (category.equals("All")) {
+                            localProviders = pincode.isEmpty() ? providerDao.getAllApprovedProviders() : providerDao.getProvidersByPincode(pincode);
+                        } else {
+                            localProviders = pincode.isEmpty() ? providerDao.getProvidersByCategory(category) : providerDao.getProvidersByCategoryAndPincode(category, pincode);
+                        }
+                        runOnUiThread(() -> adapter.setProviders(localProviders));
+                    });
+                });
     }
 }

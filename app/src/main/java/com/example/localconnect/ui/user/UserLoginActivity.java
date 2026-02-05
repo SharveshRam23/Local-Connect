@@ -22,6 +22,9 @@ public class UserLoginActivity extends AppCompatActivity {
     @javax.inject.Inject
     com.example.localconnect.data.dao.UserDao userDao;
 
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,40 +39,74 @@ public class UserLoginActivity extends AppCompatActivity {
     }
 
     private void loginUser() {
-        String phone = binding.etLoginPhone.getText().toString().trim();
-        String password = binding.etLoginPassword.getText().toString().trim();
+        String phoneInput = binding.etLoginPhone.getText().toString().trim();
+        String passwordInput = binding.etLoginPassword.getText().toString().trim();
 
-        if (TextUtils.isEmpty(phone) || TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(phoneInput) || TextUtils.isEmpty(passwordInput)) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            try {
-                User user = userDao.login(phone, password);
-                runOnUiThread(() -> {
-                    if (user != null) {
-                        // Save Session
-                        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
-                        prefs.edit()
-                                .putString("user_pincode", user.pincode)
-                                .putString("user_name", user.name)
-                                .putString("user_phone", user.phone)
-                                .putString("user_id", user.id)
-                                .putBoolean("is_user_login", true)
-                                .apply();
-
-                        Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(UserLoginActivity.this, UserHomeActivity.class);
-                        startActivity(intent);
-                        finish();
+        // Search in Firestore
+        firestore.collection("users")
+                .whereEqualTo("phone", phoneInput)
+                .whereEqualTo("password", passwordInput)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        User user = queryDocumentSnapshots.getDocuments().get(0).toObject(User.class);
+                        if (user != null) {
+                            // Sync to Room
+                            com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                                userDao.insert(user);
+                                runOnUiThread(() -> {
+                                    handleLoginSuccess(user);
+                                });
+                            });
+                        }
                     } else {
-                        Toast.makeText(this, "Invalid Credentials", Toast.LENGTH_SHORT).show();
+                        // Fallback to local Room (just in case)
+                        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                            User localUser = userDao.login(phoneInput, passwordInput);
+                            runOnUiThread(() -> {
+                                if (localUser != null) {
+                                    handleLoginSuccess(localUser);
+                                } else {
+                                    Toast.makeText(this, "Invalid Credentials", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        });
                     }
+                })
+                .addOnFailureListener(e -> {
+                    // Firestore failed, try local
+                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                        User localUser = userDao.login(phoneInput, passwordInput);
+                        runOnUiThread(() -> {
+                            if (localUser != null) {
+                                handleLoginSuccess(localUser);
+                            } else {
+                                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    });
                 });
-            } catch (Exception e) {
-                runOnUiThread(() -> Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-            }
-        });
+    }
+
+    private void handleLoginSuccess(User user) {
+        // Save Session
+        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+        prefs.edit()
+                .putString("user_pincode", user.pincode)
+                .putString("user_name", user.name)
+                .putString("user_phone", user.phone)
+                .putString("user_id", user.id)
+                .putBoolean("is_user_login", true)
+                .apply();
+
+        Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(UserLoginActivity.this, UserHomeActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

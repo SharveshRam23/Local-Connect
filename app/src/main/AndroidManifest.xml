@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -44,6 +46,15 @@
             android:name=".ui.issue.NearbyIssuesActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.issue.ImageEditorActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
         <!-- User Activities -->
         <activity
             android:name=".ui.user.UserRegistrationActivity"
@@ -69,6 +80,18 @@
             android:name=".ui.user.BookingActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.user.RateProviderActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.user.ProviderRatingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.user.MyBookingsActivity"
+            android:exported="false" />
+
         <!-- Provider Activities -->
         <activity
             android:name=".ui.provider.ProviderRegistrationActivity"
@@ -80,6 +103,10 @@
 
         <activity
             android:name=".ui.provider.ProviderDashboardActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.provider.ProviderBookingsActivity"
             android:exported="false" />
 
         <!-- Admin Activities -->

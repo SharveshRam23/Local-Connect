@@ -16,11 +16,14 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class ProviderProfileActivity extends AppCompatActivity {
 
     private ActivityProviderProfileBinding binding;
-    private String providerId;
-    private ServiceProvider currentProvider;
+    @javax.inject.Inject
+    com.google.firebase.firestore.FirebaseFirestore firestore;
 
     @javax.inject.Inject
     com.example.localconnect.data.dao.ProviderDao providerDao;
+
+    private String providerId;
+    private ServiceProvider currentProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,32 +61,89 @@ public class ProviderProfileActivity extends AppCompatActivity {
             intent.putExtra("provider_id", providerId);
             startActivity(intent);
         });
+
+        binding.btnRateProvider.setOnClickListener(v -> {
+            if (currentProvider != null) {
+                Intent intent = new Intent(this, RateProviderActivity.class);
+                intent.putExtra("provider_id", providerId);
+                intent.putExtra("provider_name", currentProvider.name);
+                startActivity(intent);
+            }
+        });
+
+        binding.btnViewAllReviews.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ProviderRatingsActivity.class);
+            intent.putExtra("provider_id", providerId);
+            intent.putExtra("provider_name", currentProvider.name != null ? currentProvider.name : "Provider");
+            startActivity(intent);
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload provider details to show updated ratings
+        loadProviderDetails();
     }
 
     private void loadProviderDetails() {
+        // First check Room for immediate display
         com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
             currentProvider = providerDao.getProviderById(providerId);
-            runOnUiThread(() -> {
-                if (currentProvider != null) {
-                    binding.tvName.setText(currentProvider.name);
-                    binding.tvCategory.setText("Category: " + currentProvider.category);
-                    binding.tvExperience.setText("Experience: " + currentProvider.experience + " Years");
-                    binding.tvPhone.setText("Phone: " + currentProvider.phone);
-                    
-                    if (currentProvider.isAvailable) {
-                        binding.tvAvailability.setText("● Available");
-                        binding.tvAvailability.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
-                        binding.btnBookNow.setEnabled(true);
-                    } else {
-                        binding.tvAvailability.setText("● Not Available");
-                        binding.tvAvailability.setTextColor(android.graphics.Color.RED);
-                        binding.btnBookNow.setEnabled(false);
-                        binding.btnBookNow.setText("Currently Unavailable");
-                    }
-                } else {
-                    Toast.makeText(this, "Provider data missing", Toast.LENGTH_SHORT).show();
-                }
-            });
+            if (currentProvider != null) {
+                runOnUiThread(() -> updateUI());
+            }
+            
+            // Sync from Firestore for latest data
+            firestore.collection("service_providers").document(providerId).get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        ServiceProvider provider = documentSnapshot.toObject(ServiceProvider.class);
+                        if (provider != null) {
+                            currentProvider = provider;
+                            updateUI();
+                            // Update Room
+                            com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> providerDao.insert(provider));
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        if (currentProvider == null) {
+                            Toast.makeText(this, "Error loading cloud data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
         });
+    }
+
+    private void updateUI() {
+        if (currentProvider == null) return;
+        
+        binding.tvName.setText(currentProvider.name);
+        binding.tvCategory.setText("Category: " + currentProvider.category);
+        binding.tvExperience.setText("Experience: " + currentProvider.experience + " Years");
+        binding.tvPhone.setText("Phone: " + currentProvider.phone);
+        
+        // Display rating
+        if (currentProvider.ratingCount > 0) {
+            binding.ratingBar.setRating(currentProvider.rating);
+            binding.tvRating.setText(String.format("%.1f (%d reviews)", currentProvider.rating, currentProvider.ratingCount));
+            binding.ratingBar.setVisibility(android.view.View.VISIBLE);
+            binding.tvRating.setVisibility(android.view.View.VISIBLE);
+            binding.btnViewAllReviews.setVisibility(android.view.View.VISIBLE);
+        } else {
+            binding.tvRating.setText("No ratings yet");
+            binding.ratingBar.setVisibility(android.view.View.GONE);
+            binding.tvRating.setVisibility(android.view.View.VISIBLE);
+            binding.btnViewAllReviews.setVisibility(android.view.View.GONE);
+        }
+        
+        if (currentProvider.isAvailable) {
+            binding.tvAvailability.setText("● Available");
+            binding.tvAvailability.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+            binding.btnBookNow.setEnabled(true);
+        } else {
+            binding.tvAvailability.setText("● Not Available");
+            binding.tvAvailability.setTextColor(android.graphics.Color.RED);
+            binding.btnBookNow.setEnabled(false);
+            binding.btnBookNow.setText("Currently Unavailable");
+        }
     }
 }

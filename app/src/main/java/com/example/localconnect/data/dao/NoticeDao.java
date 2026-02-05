@@ -2,6 +2,7 @@ package com.example.localconnect.data.dao;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import com.example.localconnect.model.Notice;
@@ -10,7 +11,7 @@ import java.util.List;
 
 @Dao
 public interface NoticeDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Notice notice);
 
     @Query("SELECT * FROM notices WHERE type = 'GLOBAL' OR (type = 'AREA' AND targetPincode = :pincode) ORDER BY scheduledTime DESC")
