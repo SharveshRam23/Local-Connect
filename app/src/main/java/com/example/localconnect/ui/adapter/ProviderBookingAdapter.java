@@ -52,6 +52,14 @@ public class ProviderBookingAdapter extends RecyclerView.Adapter<ProviderBooking
         holder.tvDateTime.setText("Date: " + booking.date);
         holder.tvStatus.setText(booking.status);
         
+        holder.tvAddress.setText(booking.address != null && !booking.address.isEmpty() ? "Address: " + booking.address : "Address: Not provided");
+        if (booking.latitude != 0.0) {
+            holder.tvLocation.setText(String.format("Location: %.4f, %.4f", booking.latitude, booking.longitude));
+            holder.tvLocation.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvLocation.setVisibility(View.GONE);
+        }
+        
         if (booking.status.equals("PENDING")) {
             holder.layoutActions.setVisibility(View.VISIBLE);
             holder.btnApprove.setVisibility(View.VISIBLE);
@@ -82,7 +90,7 @@ public class ProviderBookingAdapter extends RecyclerView.Adapter<ProviderBooking
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvService, tvUser, tvDateTime, tvStatus;
+        TextView tvService, tvUser, tvDateTime, tvStatus, tvAddress, tvLocation;
         LinearLayout layoutActions;
         Button btnApprove, btnDecline, btnComplete;
 
@@ -92,6 +100,8 @@ public class ProviderBookingAdapter extends RecyclerView.Adapter<ProviderBooking
             tvUser = itemView.findViewById(R.id.tvRequestUser);
             tvDateTime = itemView.findViewById(R.id.tvRequestDateTime);
             tvStatus = itemView.findViewById(R.id.tvRequestStatus);
+            tvAddress = itemView.findViewById(R.id.tvRequestAddress);
+            tvLocation = itemView.findViewById(R.id.tvRequestLocation);
             layoutActions = itemView.findViewById(R.id.layoutActions);
             btnApprove = itemView.findViewById(R.id.btnApprove);
             btnDecline = itemView.findViewById(R.id.btnDecline);

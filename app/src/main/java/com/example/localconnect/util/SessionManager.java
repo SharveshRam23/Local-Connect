@@ -9,6 +9,7 @@ public class SessionManager {
     private static final String KEY_PROVIDER_NAME = "provider_name";
     private static final String KEY_PROVIDER_PINCODE = "provider_pincode";
     private static final String KEY_PROVIDER_ID = "provider_id";
+    private static final String KEY_PROVIDER_PROFILE_IMAGE = "provider_profile_image";
 
     private SharedPreferences prefs;
     private SharedPreferences.Editor editor;
@@ -20,11 +21,12 @@ public class SessionManager {
         editor = prefs.edit();
     }
 
-    public void createProviderSession(String id, String name, String pincode) {
+    public void createProviderSession(String id, String name, String pincode, String profileImageUrl) {
         editor.putBoolean(KEY_IS_PROVIDER_LOGIN, true);
         editor.putString(KEY_PROVIDER_ID, id);
         editor.putString(KEY_PROVIDER_NAME, name);
         editor.putString(KEY_PROVIDER_PINCODE, pincode);
+        editor.putString(KEY_PROVIDER_PROFILE_IMAGE, profileImageUrl);
         editor.apply();
     }
 
@@ -42,6 +44,10 @@ public class SessionManager {
 
     public String getProviderPincode() {
         return prefs.getString(KEY_PROVIDER_PINCODE, "");
+    }
+
+    public String getProviderProfileImage() {
+        return prefs.getString(KEY_PROVIDER_PROFILE_IMAGE, null);
     }
 
     public void logout() {

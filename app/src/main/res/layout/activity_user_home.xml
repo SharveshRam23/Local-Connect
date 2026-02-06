@@ -1,87 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/gradient_background"
     android:padding="16dp">
 
-    <!-- Header with Home Button -->
-    <LinearLayout
+    <!-- Premium Header -->
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="16dp">
-
-        <TextView
-            android:id="@+id/tvWelcome"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Welcome User"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
-
-        <ImageButton
-            android:id="@+id/btnHome"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_home"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Home"
-            android:tint="#1E88E5"/>
-    </LinearLayout>
-
-
-    <Button
-        android:id="@+id/btnFindServices"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Find Services Nearby"
-        android:layout_marginBottom="16dp"/>
-
-    <Button
-        android:id="@+id/btnViewBookings"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="View My Bookings"
         android:layout_marginBottom="16dp"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-    
-    <Button
-        android:id="@+id/btnReportIssue"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Report Issue"
-        android:layout_marginBottom="16dp"/>
+        app:cardElevation="4dp"
+        app:cardCornerRadius="0dp"
+        app:cardBackgroundColor="@color/colorPrimary">
 
-    <Button
-        android:id="@+id/btnViewNearbyIssues"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="View Nearby Issues"
-        android:layout_marginBottom="16dp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Public Notices"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="8dp"/>
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvProfile"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true">
+                <ImageView
+                    android:id="@+id/ivUserProfile"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_profile"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Profile"/>
+            </androidx.cardview.widget.CardView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvNotices"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+            <TextView
+                android:id="@+id/tvWelcome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Welcome User"
+                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:layout_toEndOf="@id/cvProfile"
+                android:layout_marginStart="12dp"
+                android:layout_centerVertical="true"/>
 
-    <Button
-        android:id="@+id/btnLogout"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true">
+
+                <ImageButton
+                    android:id="@+id/btnHome"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_home"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Home"
+                    app:tint="@color/white"/>
+
+                <ImageButton
+                    android:id="@+id/btnLogoutIcon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_logout"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Logout"
+                    app:tint="@color/white"/>
+            </LinearLayout>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Logout"
-        android:layout_marginTop="16dp"
-        style="@style/Widget.MaterialComponents.Button.TextButton"/>
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Action Cards -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/PremiumCard">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <Button
+                        android:id="@+id/btnFindServices"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Find Services Nearby"
+                        android:layout_marginBottom="12dp"
+                        app:icon="@drawable/ic_location"/>
+
+                    <Button
+                        android:id="@+id/btnViewBookings"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="View My Bookings"
+                        android:layout_marginBottom="12dp"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        app:icon="@drawable/ic_call"/>
+                    
+                    <Button
+                        android:id="@+id/btnReportIssue"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Report Issue"
+                        android:layout_marginBottom="12dp"
+                        app:icon="@drawable/ic_message"/>
+
+                    <Button
+                        android:id="@+id/btnViewNearbyIssues"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="View Nearby Issues"
+                        android:layout_marginBottom="12dp"
+                        app:icon="@drawable/ic_location"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Public Notices"
+                style="@style/HeaderTitle"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvNotices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"/>
+
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

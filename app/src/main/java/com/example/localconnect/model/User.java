@@ -14,6 +14,8 @@ public class User {
     public String phone;
     public String pincode;
     public String password;
+    public String profileImageUrl;
+    public String bio;
 
     // Required for Firestore
     public User() {}

@@ -47,7 +47,7 @@ public class ProviderBookingsActivity extends AppCompatActivity implements Provi
         TabLayout tabLayout = findViewById(R.id.tabLayout);
 
         tabLayout.addTab(tabLayout.newTab().setText("New"));
-        tabLayout.addTab(tabLayout.newTab().setText("Upcoming"));
+        tabLayout.addTab(tabLayout.newTab().setText("My Appointments"));
         tabLayout.addTab(tabLayout.newTab().setText("History"));
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

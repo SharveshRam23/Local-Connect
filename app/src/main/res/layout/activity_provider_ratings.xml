@@ -3,30 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_bg">
+    android:background="@drawable/gradient_background">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="0dp">
+        app:cardElevation="4dp"
+        app:cardCornerRadius="0dp"
+        app:cardBackgroundColor="@color/colorPrimary"
+        android:layout_gravity="top">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp">
+            android:layout_height="wrap_content"
+            android:padding="16dp">
 
             <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:src="@drawable/ic_home"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="@color/white"
-                android:rotation="-180"/>
+                app:tint="@color/white"
+                android:rotation="-180"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"/>
 
             <TextView
                 android:id="@+id/tvRatingTitle"
@@ -36,9 +37,11 @@
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:layout_marginStart="16dp"/>
-        </LinearLayout>
-    </com.google.android.material.appbar.AppBarLayout>
+                android:layout_toEndOf="@id/btnBack"
+                android:layout_marginStart="16dp"
+                android:layout_centerVertical="true"/>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvRatings"

@@ -22,6 +22,6 @@ public class FirestoreModule {
     @Provides
     @Singleton
     public com.google.firebase.storage.FirebaseStorage provideFirebaseStorage() {
-        return com.google.firebase.storage.FirebaseStorage.getInstance();
+        return com.google.firebase.storage.FirebaseStorage.getInstance("gs://localconnect-87b90.firebasestorage.app");
     }
 }

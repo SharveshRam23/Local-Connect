@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Database(entities = { User.class, ServiceProvider.class, Notice.class,
-        Issue.class, Booking.class, com.example.localconnect.model.Comment.class, Rating.class }, version = 7, exportSchema = false)
+        Issue.class, Booking.class, com.example.localconnect.model.Comment.class, Rating.class }, version = 8, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UserDao userDao();

@@ -55,13 +55,10 @@ public class UserHomeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        binding.btnLogout.setOnClickListener(v -> {
-            SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
-            prefs.edit().clear().apply();
-            Intent intent = new Intent(this, com.example.localconnect.MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+        binding.btnLogoutIcon.setOnClickListener(v -> logout());
+
+        binding.ivUserProfile.setOnClickListener(v -> {
+            startActivity(new Intent(this, EditUserProfileActivity.class));
         });
 
         binding.btnHome.setOnClickListener(v -> {
@@ -70,7 +67,57 @@ public class UserHomeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        loadUserData();
         loadNotices();
+    }
+
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.UserDao userDao;
+
+    private void loadUserData() {
+        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+        String userId = prefs.getString("user_id", "");
+        if (userId.isEmpty()) return;
+
+        // Try local first
+        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+            com.example.localconnect.model.User user = userDao.getUserById(userId);
+            if (user != null) {
+                runOnUiThread(() -> populateUserProfile(user));
+            }
+        });
+
+        // Sync from Firestore
+        firestore.collection("users").document(userId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    com.example.localconnect.model.User user = documentSnapshot.toObject(com.example.localconnect.model.User.class);
+                    if (user != null) {
+                        populateUserProfile(user);
+                        // Update local
+                        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> userDao.insert(user));
+                    }
+                });
+    }
+
+    private void populateUserProfile(com.example.localconnect.model.User user) {
+        if (user == null) return;
+        binding.tvWelcome.setText("Welcome " + user.name);
+        if (user.profileImageUrl != null && !user.profileImageUrl.isEmpty()) {
+            com.bumptech.glide.Glide.with(this)
+                    .load(user.profileImageUrl)
+                    .placeholder(com.example.localconnect.R.drawable.ic_profile)
+                    .circleCrop()
+                    .into(binding.ivUserProfile);
+        }
+    }
+
+    private void logout() {
+        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+        prefs.edit().clear().apply();
+        Intent intent = new Intent(this, com.example.localconnect.MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void loadNotices() {

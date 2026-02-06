@@ -12,6 +12,9 @@ public interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(User user);
 
+    @Query("SELECT * FROM users WHERE id = :id LIMIT 1")
+    User getUserById(String id);
+
     @Query("SELECT * FROM users WHERE phone = :phone AND password = :password LIMIT 1")
     User login(String phone, String password);
 

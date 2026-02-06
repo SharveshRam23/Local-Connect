@@ -23,6 +23,9 @@ public class ServiceProvider {
 
     public String availableFrom;
     public String availableTo;
+    public String profileImageUrl;
+    public String bio;
+    public String address;
 
     // Rating fields
     public float rating; // Average rating (0-5)

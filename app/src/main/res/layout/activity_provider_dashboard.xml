@@ -1,51 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/gradient_background"
     android:padding="16dp">
 
-    <LinearLayout
+    <!-- Premium Header -->
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="16dp">
+        android:layout_marginBottom="16dp"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="0dp"
+        app:cardBackgroundColor="@color/colorPrimary">
 
-        <TextView
-            android:id="@+id/tvDashboardTitle"
-            android:layout_width="0dp"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Provider Dashboard"
-            android:textSize="22sp"
-            android:textStyle="bold"/>
+            android:padding="16dp">
 
-        <ImageButton
-            android:id="@+id/btnHome"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_home"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Home"
-            android:tint="#26A69A"
-            android:layout_marginEnd="8dp"/>
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvProviderProfile"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true">
 
-        <Button
-            android:id="@+id/btnLogoutProvider"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Logout"
-            style="@style/Widget.MaterialComponents.Button.TextButton"/>
-    </LinearLayout>
+                <ImageView
+                    android:id="@+id/ivProviderProfile"
+                    android:layout_width="match_parent"
+                    android:layout_height="37dp"
+                    android:contentDescription="Profile"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_profile" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/tvDashboardTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Provider Dashboard"
+                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:layout_toEndOf="@id/cvProviderProfile"
+                android:layout_marginStart="12dp"
+                android:layout_centerVertical="true"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true">
+
+                <ImageButton
+                    android:id="@+id/btnHome"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_home"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Home"
+                    app:tint="@color/white"/>
+
+                <ImageButton
+                    android:id="@+id/btnProviderLogoutIcon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_logout"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Logout"
+                    app:tint="@color/white"/>
+            </LinearLayout>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         app:cardCornerRadius="8dp"
-        app:cardElevation="2dp"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        app:cardElevation="2dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -138,14 +177,7 @@
         android:id="@+id/rvProviderAppointments"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1" />
 
-    <Button
-        android:id="@+id/btnProviderLogout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Logout"
-        android:layout_marginTop="16dp"
-        style="@style/Widget.MaterialComponents.Button.TextButton"/>
 
 </LinearLayout>

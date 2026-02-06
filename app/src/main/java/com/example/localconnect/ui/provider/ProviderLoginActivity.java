@@ -104,7 +104,7 @@ public class ProviderLoginActivity extends AppCompatActivity {
         if (provider.isApproved) {
             // Login Success
             com.example.localconnect.util.SessionManager sessionManager = new com.example.localconnect.util.SessionManager(this);
-            sessionManager.createProviderSession(provider.id, provider.name, provider.pincode);
+            sessionManager.createProviderSession(provider.id, provider.name, provider.pincode, provider.profileImageUrl);
 
             Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(ProviderLoginActivity.this, ProviderDashboardActivity.class);

@@ -1,9 +1,34 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.Localconnect" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
+        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/colorSurface</item>
     </style>
 
     <style name="Theme.Localconnect" parent="Base.Theme.Localconnect" />
+
+    <!-- Premium Card Style -->
+    <style name="PremiumCard" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="cardBackgroundColor">@color/white</item>
+    </style>
+
+    <!-- Header Style -->
+    <style name="HeaderTitle">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="DashboardHeaderCard">
+        <item name="cardElevation">4dp</item>
+        <item name="cardCornerRadius">0dp</item>
+        <item name="cardBackgroundColor">@color/colorPrimary</item>
+        <item name="android:layout_marginBottom">16dp</item>
+    </style>
 </resources>

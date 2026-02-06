@@ -92,6 +92,10 @@
             android:name=".ui.user.MyBookingsActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.user.EditUserProfileActivity"
+            android:exported="false" />
+
         <!-- Provider Activities -->
         <activity
             android:name=".ui.provider.ProviderRegistrationActivity"
@@ -107,6 +111,10 @@
 
         <activity
             android:name=".ui.provider.ProviderBookingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.provider.EditProviderProfileActivity"
             android:exported="false" />
 
         <!-- Admin Activities -->

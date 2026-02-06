@@ -178,67 +178,74 @@ public class ReportIssueActivity extends AppCompatActivity {
             return;
         }
 
-        if (currentBitmap == null) {
-            Toast.makeText(this, "Please select or capture an image", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         btnSubmit.setEnabled(false);
-        btnSubmit.setText("Uploading...");
+        btnSubmit.setText("Submitting...");
 
+        String id = UUID.randomUUID().toString();
+
+        if (currentBitmap != null) {
+            uploadImageAndSubmit(id, description);
+        } else {
+            submitIssueMetadata(id, description, null);
+        }
+    }
+
+    private void uploadImageAndSubmit(String id, String description) {
         // Get user session
         SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
         String pincode = prefs.getString("user_pincode", "000000");
         String reporterName = prefs.getString("user_name", "Anonymous");
 
-        // Save compressed image locally first
-        String id = UUID.randomUUID().toString();
-        String fileName = "issue_" + id + ".jpg";
-        File file = new File(getExternalFilesDir(null), fileName);
-        String imagePath = ImageUtil.compressImage(currentBitmap, file);
+        // Compress image to bytes for direct upload
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        currentBitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+        byte[] data = baos.toByteArray();
 
-        if (imagePath == null) {
-            Toast.makeText(this, "Failed to compress image", Toast.LENGTH_SHORT).show();
+        if (firebaseStorage == null) {
+            Toast.makeText(this, "Firebase Storage not initialized", Toast.LENGTH_SHORT).show();
             btnSubmit.setEnabled(true);
             btnSubmit.setText("Submit Issue");
             return;
         }
 
-        // Upload to Firebase Storage
+        // Upload to Firebase Storage using putBytes
         com.google.firebase.storage.StorageReference ref = firebaseStorage.getReference()
                 .child("issue_images/" + id + ".jpg");
 
-        ref.putFile(Uri.fromFile(new File(imagePath)))
+        ref.putBytes(data)
                 .addOnSuccessListener(taskSnapshot -> {
                     ref.getDownloadUrl().addOnSuccessListener(uri -> {
-                        String cloudImageUrl = uri.toString();
-                        
-                        // Create Issue object with cloud URL
-                        Issue issue = new Issue(id, description, cloudImageUrl, pincode, System.currentTimeMillis(), reporterName);
-                        
-                        // Save to Firestore
-                        firestore.collection("issues")
-                                .document(id)
-                                .set(issue)
-                                .addOnSuccessListener(aVoid -> {
-                                    // Sync to local Room
-                                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
-                                        issueDao.insert(issue);
-                                        runOnUiThread(() -> {
-                                            Toast.makeText(this, "Issue reported and synced to cloud!", Toast.LENGTH_LONG).show();
-                                            finish();
-                                        });
-                                    });
-                                })
-                                .addOnFailureListener(e -> {
-                                    Toast.makeText(this, "Firestore Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                    btnSubmit.setEnabled(true);
-                                    btnSubmit.setText("Submit Issue");
-                                });
+                        submitIssueMetadata(id, description, uri.toString());
                     });
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Storage Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    btnSubmit.setEnabled(true);
+                    btnSubmit.setText("Submit Issue");
+                });
+    }
+
+    private void submitIssueMetadata(String id, String description, String cloudImageUrl) {
+        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+        String pincode = prefs.getString("user_pincode", "000000");
+        String reporterName = prefs.getString("user_name", "Anonymous");
+
+        Issue issue = new Issue(id, description, cloudImageUrl, pincode, System.currentTimeMillis(), reporterName);
+
+        firestore.collection("issues")
+                .document(id)
+                .set(issue)
+                .addOnSuccessListener(aVoid -> {
+                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+                        issueDao.insert(issue);
+                        runOnUiThread(() -> {
+                            Toast.makeText(this, "Issue reported and synced to cloud!", Toast.LENGTH_LONG).show();
+                            finish();
+                        });
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Firestore Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     btnSubmit.setEnabled(true);
                     btnSubmit.setText("Submit Issue");
                 });

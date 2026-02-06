@@ -101,6 +101,7 @@ public class UserLoginActivity extends AppCompatActivity {
                 .putString("user_name", user.name)
                 .putString("user_phone", user.phone)
                 .putString("user_id", user.id)
+                .putString("user_profile_image", user.profileImageUrl)
                 .putBoolean("is_user_login", true)
                 .apply();
 

@@ -1,131 +1,237 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:background="@drawable/gradient_background"
     android:gravity="center_horizontal">
 
-    <ImageView
-        android:id="@+id/ivProfile"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@drawable/ic_launcher_foreground"
-        android:background="@android:color/darker_gray"
-        android:layout_marginBottom="24dp"/>
-
-    <TextView
-        android:id="@+id/tvName"
-        android:layout_width="wrap_content"
+    <!-- Premium Header -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Provider Name"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="8dp"/>
-
-    <TextView
-        android:id="@+id/tvCategory"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Category: Service"
-        android:textSize="18sp"
-        android:layout_marginBottom="4dp"/>
-
-    <TextView
-        android:id="@+id/tvExperience"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Experience: X Years"
-        android:textSize="16sp"
-        android:layout_marginBottom="4dp"/>
-
-    <TextView
-        android:id="@+id/tvPhone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Phone: 1234567890"
-        android:textSize="16sp"
-        android:layout_marginBottom="4dp"/>
-
-    <TextView
-        android:id="@+id/tvAvailability"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="● Available"
-        android:textSize="18sp"
-        android:textColor="#4CAF50"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
-
-    <RatingBar
-        android:id="@+id/ratingBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:numStars="5"
-        android:rating="0"
-        android:layout_marginBottom="4dp"
-        style="@style/Widget.AppCompat.RatingBar.Small"
-        android:isIndicator="true"
-        android:visibility="gone"/>
-
-    <TextView
-        android:id="@+id/tvRating"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="No ratings yet"
-        android:textSize="14sp"
-        android:textColor="#666666"
-        android:layout_marginBottom="4dp"/>
-
-    <TextView
-        android:id="@+id/btnViewAllReviews"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="See All Reviews"
-        android:textColor="#2196F3"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:padding="8dp"
         android:layout_marginBottom="16dp"
-        android:visibility="gone"/>
+        app:cardElevation="4dp"
+        app:cardCornerRadius="0dp"
+        app:cardBackgroundColor="@color/colorPrimary">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="16dp"
-        android:weightSum="2">
-
-        <Button
-            android:id="@+id/btnCall"
-            android:layout_width="0dp"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Call"
-            android:layout_marginEnd="8dp"/>
+            android:padding="16dp">
 
-        <Button
-            android:id="@+id/btnSms"
-            android:layout_width="0dp"
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_home"
+                android:rotation="180"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/white"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Provider Profile"
+                android:textSize="20sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:layout_toEndOf="@id/btnBack"
+                android:layout_marginStart="16dp"
+                android:layout_centerVertical="true"/>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Message"/>
+            android:orientation="vertical"
+            android:padding="16dp">
 
-    </LinearLayout>
+            <!-- Profile Overview Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/PremiumCard">
 
-    <Button
-        android:id="@+id/btnBookNow"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Book This Service"
-        android:padding="16dp"
-        android:layout_marginBottom="8dp"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center_horizontal">
 
-    <Button
-        android:id="@+id/btnRateProvider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Rate This Provider"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        app:cardCornerRadius="50dp"
+                        app:cardElevation="2dp"
+                        android:layout_marginBottom="16dp">
+                        <ImageView
+                            android:id="@+id/ivProfile"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_profile"
+                            android:scaleType="centerCrop"/>
+                    </androidx.cardview.widget.CardView>
+
+                    <TextView
+                        android:id="@+id/tvName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Provider Name"
+                        style="@style/HeaderTitle"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:id="@+id/tvCategory"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Service Category"
+                        android:textColor="@color/gray_500"
+                        android:textSize="16sp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+                        
+                        <RatingBar
+                            android:id="@+id/ratingBar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:numStars="5"
+                            android:rating="0"
+                            style="@style/Widget.AppCompat.RatingBar.Small"
+                            android:isIndicator="true"/>
+
+                        <TextView
+                            android:id="@+id/tvRating"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0.0"
+                            android:textSize="14sp"
+                            android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvAvailability"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="● Available"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp"/>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Details Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/PremiumCard">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Details"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimary"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:id="@+id/tvExperience"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Experience: X Years"
+                        android:layout_marginBottom="8dp"
+                        app:drawableStartCompat="@drawable/ic_launcher_foreground"
+                        android:drawablePadding="8dp"/>
+
+                    <TextView
+                        android:id="@+id/tvPhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Phone: 1234567890"
+                        android:layout_marginBottom="8dp"
+                        app:drawableStartCompat="@drawable/ic_call"
+                        android:drawablePadding="8dp"
+                        app:drawableTint="@color/colorPrimary"/>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Actions -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:weightSum="2">
+
+                <Button
+                    android:id="@+id/btnCall"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Call"
+                    android:layout_marginEnd="8dp"
+                    app:icon="@drawable/ic_call"/>
+
+                <Button
+                    android:id="@+id/btnSms"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Message"
+                    app:icon="@drawable/ic_message"/>
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnBookNow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Book This Service"
+                android:layout_marginTop="12dp"
+                android:padding="16dp"/>
+
+            <Button
+                android:id="@+id/btnRateProvider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Rate This Provider"
+                android:layout_marginTop="8dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+            <TextView
+                android:id="@+id/btnViewAllReviews"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="See All Reviews"
+                android:textAlignment="center"
+                android:textColor="@color/colorAccent"
+                android:textStyle="bold"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"/>
+
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

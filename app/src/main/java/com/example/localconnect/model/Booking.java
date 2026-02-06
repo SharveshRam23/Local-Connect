@@ -16,6 +16,9 @@ public class Booking {
     public String date;
     public String details;
     public String status; // PENDING, ACCEPTED, REJECTED, COMPLETED
+    public double latitude;
+    public double longitude;
+    public String address;
 
     // Required for Firestore
     public Booking() {}
