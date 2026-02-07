@@ -19,6 +19,10 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+import android.graphics.Bitmap;
+import android.provider.MediaStore;
+import java.io.ByteArrayOutputStream;
+
 @AndroidEntryPoint
 public class EditUserProfileActivity extends AppCompatActivity {
 
@@ -55,9 +59,6 @@ public class EditUserProfileActivity extends AppCompatActivity {
 
     @Inject
     com.google.firebase.firestore.FirebaseFirestore firestore;
-
-    @Inject
-    com.google.firebase.storage.FirebaseStorage firebaseStorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,25 +127,21 @@ public class EditUserProfileActivity extends AppCompatActivity {
 
     private void uploadImageAndSaveProfile() {
         binding.btnSave.setEnabled(false);
-        binding.btnSave.setText("Uploading...");
+        binding.btnSave.setText("Processing...");
 
-        com.google.firebase.storage.StorageReference ref = firebaseStorage.getReference()
-                .child("profile_images/users/" + userId + ".jpg");
-
-        ref.putFile(selectedImageUri)
-                .addOnSuccessListener(taskSnapshot -> {
-                    ref.getDownloadUrl().addOnSuccessListener(uri -> {
-                        if (currentUser != null) {
-                            currentUser.profileImageUrl = uri.toString();
-                        }
-                        saveProfile();
-                    });
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    binding.btnSave.setEnabled(true);
-                    binding.btnSave.setText("Save Changes");
-                });
+        try {
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
+            String base64Image = com.example.localconnect.util.ImageUtil.toBase64Aggressive(bitmap);
+            
+            if (currentUser != null) {
+                currentUser.profileImageUrl = base64Image;
+            }
+            saveProfile();
+        } catch (Exception e) {
+            Toast.makeText(this, "Failed to process image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            binding.btnSave.setEnabled(true);
+            binding.btnSave.setText("Save Changes");
+        }
     }
 
     private void saveProfile() {

@@ -56,9 +56,6 @@ public class EditProviderProfileActivity extends AppCompatActivity {
     @Inject
     com.google.firebase.firestore.FirebaseFirestore firestore;
 
-    @Inject
-    com.google.firebase.storage.FirebaseStorage firebaseStorage;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,25 +123,21 @@ public class EditProviderProfileActivity extends AppCompatActivity {
 
     private void uploadImageAndSaveProfile() {
         binding.btnSave.setEnabled(false);
-        binding.btnSave.setText("Uploading...");
+        binding.btnSave.setText("Processing...");
 
-        com.google.firebase.storage.StorageReference ref = firebaseStorage.getReference()
-                .child("profile_images/providers/" + providerId + ".jpg");
-
-        ref.putFile(selectedImageUri)
-                .addOnSuccessListener(taskSnapshot -> {
-                    ref.getDownloadUrl().addOnSuccessListener(uri -> {
-                        if (currentProvider != null) {
-                            currentProvider.profileImageUrl = uri.toString();
-                        }
-                        saveProfile();
-                    });
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    binding.btnSave.setEnabled(true);
-                    binding.btnSave.setText("Save Changes");
-                });
+        try {
+            android.graphics.Bitmap bitmap = android.provider.MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
+            String base64Image = com.example.localconnect.util.ImageUtil.toBase64Aggressive(bitmap);
+            
+            if (currentProvider != null) {
+                currentProvider.profileImageUrl = base64Image;
+            }
+            saveProfile();
+        } catch (Exception e) {
+            Toast.makeText(this, "Failed to process image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            binding.btnSave.setEnabled(true);
+            binding.btnSave.setText("Save Changes");
+        }
     }
 
     private void saveProfile() {

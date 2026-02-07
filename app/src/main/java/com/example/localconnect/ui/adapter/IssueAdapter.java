@@ -56,8 +56,15 @@ public class IssueAdapter extends RecyclerView.Adapter<IssueAdapter.IssueViewHol
         holder.tvDate.setText(sdf.format(new Date(issue.timestamp)));
 
         if (issue.imagePath != null && !issue.imagePath.isEmpty()) {
-            // Use ImageUtil to decode safely (resizing to thumbnail size for list)
-            holder.ivIssue.setImageBitmap(com.example.localconnect.util.ImageUtil.decodeSampledBitmapFromPath(issue.imagePath, 200, 200));
+            if (issue.imagePath.length() > 200) { // Likely a Base64 string
+                android.graphics.Bitmap bitmap = com.example.localconnect.util.ImageUtil.fromBase64(issue.imagePath);
+                if (bitmap != null) {
+                    holder.ivIssue.setImageBitmap(bitmap);
+                }
+            } else {
+                // Use ImageUtil to decode safely (resizing to thumbnail size for list)
+                holder.ivIssue.setImageBitmap(com.example.localconnect.util.ImageUtil.decodeSampledBitmapFromPath(issue.imagePath, 200, 200));
+            }
         }
 
         if (issue.adminResponse != null && !issue.adminResponse.isEmpty()) {

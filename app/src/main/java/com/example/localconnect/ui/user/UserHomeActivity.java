@@ -103,11 +103,15 @@ public class UserHomeActivity extends AppCompatActivity {
         if (user == null) return;
         binding.tvWelcome.setText("Welcome " + user.name);
         if (user.profileImageUrl != null && !user.profileImageUrl.isEmpty()) {
-            com.bumptech.glide.Glide.with(this)
-                    .load(user.profileImageUrl)
-                    .placeholder(com.example.localconnect.R.drawable.ic_profile)
-                    .circleCrop()
-                    .into(binding.ivUserProfile);
+            if (user.profileImageUrl.length() > 500) { // Likely Base64
+                binding.ivUserProfile.setImageBitmap(com.example.localconnect.util.ImageUtil.fromBase64(user.profileImageUrl));
+            } else {
+                com.bumptech.glide.Glide.with(this)
+                        .load(user.profileImageUrl)
+                        .placeholder(com.example.localconnect.R.drawable.ic_profile)
+                        .circleCrop()
+                        .into(binding.ivUserProfile);
+            }
         }
     }
 

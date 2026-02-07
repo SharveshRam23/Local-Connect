@@ -108,6 +108,8 @@ public class AdminIssueDetailActivity extends AppCompatActivity {
                             }
                         })
                         .into(ivImage);
+            } else if (currentIssue.imagePath.length() > 500) { // Likely Base64
+                ivImage.setImageBitmap(com.example.localconnect.util.ImageUtil.fromBase64(currentIssue.imagePath));
             } else {
                 ivImage.setImageBitmap(BitmapFactory.decodeFile(currentIssue.imagePath));
             }

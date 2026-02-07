@@ -91,4 +91,35 @@ public class ImageUtil {
                 true
         );
     }
+
+    // Convert Bitmap to Base64 String
+    public static String toBase64(Bitmap bitmap) {
+        if (bitmap == null) return null;
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+        byte[] bytes = baos.toByteArray();
+        return android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT);
+    }
+
+    // Convert Base64 String to Bitmap
+    public static Bitmap fromBase64(String base64String) {
+        if (base64String == null || base64String.isEmpty()) return null;
+        try {
+            byte[] decodedBytes = android.util.Base64.decode(base64String, android.util.Base64.DEFAULT);
+            return android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // Aggressive compression for Firestore Base64 (Resize to 400px, 60% quality)
+    public static String toBase64Aggressive(Bitmap bitmap) {
+        if (bitmap == null) return null;
+        Bitmap resized = resize(bitmap, 400, 400);
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        resized.compress(Bitmap.CompressFormat.JPEG, 60, baos);
+        byte[] bytes = baos.toByteArray();
+        return android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT);
+    }
 }

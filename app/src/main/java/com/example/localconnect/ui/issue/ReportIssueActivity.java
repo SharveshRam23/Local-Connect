@@ -42,9 +42,6 @@ public class ReportIssueActivity extends AppCompatActivity {
     @javax.inject.Inject
     com.google.firebase.firestore.FirebaseFirestore firestore;
 
-    @javax.inject.Inject
-    com.google.firebase.storage.FirebaseStorage firebaseStorage;
-
     // Camera Launcher
     private final ActivityResultLauncher<Intent> cameraLauncher =
             registerForActivityResult(
@@ -191,38 +188,9 @@ public class ReportIssueActivity extends AppCompatActivity {
     }
 
     private void uploadImageAndSubmit(String id, String description) {
-        // Get user session
-        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
-        String pincode = prefs.getString("user_pincode", "000000");
-        String reporterName = prefs.getString("user_name", "Anonymous");
-
-        // Compress image to bytes for direct upload
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        currentBitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
-        byte[] data = baos.toByteArray();
-
-        if (firebaseStorage == null) {
-            Toast.makeText(this, "Firebase Storage not initialized", Toast.LENGTH_SHORT).show();
-            btnSubmit.setEnabled(true);
-            btnSubmit.setText("Submit Issue");
-            return;
-        }
-
-        // Upload to Firebase Storage using putBytes
-        com.google.firebase.storage.StorageReference ref = firebaseStorage.getReference()
-                .child("issue_images/" + id + ".jpg");
-
-        ref.putBytes(data)
-                .addOnSuccessListener(taskSnapshot -> {
-                    ref.getDownloadUrl().addOnSuccessListener(uri -> {
-                        submitIssueMetadata(id, description, uri.toString());
-                    });
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Storage Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    btnSubmit.setEnabled(true);
-                    btnSubmit.setText("Submit Issue");
-                });
+        // Convert to Base64 with aggressive compression
+        String base64Image = ImageUtil.toBase64Aggressive(currentBitmap);
+        submitIssueMetadata(id, description, base64Image);
     }
 
     private void submitIssueMetadata(String id, String description, String cloudImageUrl) {

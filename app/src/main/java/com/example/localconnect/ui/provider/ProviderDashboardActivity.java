@@ -129,11 +129,15 @@ public class ProviderDashboardActivity extends AppCompatActivity {
         // Load profile image
         android.widget.ImageView ivProfile = findViewById(R.id.ivProviderProfile);
         if (provider.profileImageUrl != null && !provider.profileImageUrl.isEmpty()) {
-            com.bumptech.glide.Glide.with(this)
-                    .load(provider.profileImageUrl)
-                    .placeholder(com.example.localconnect.R.drawable.ic_profile)
-                    .circleCrop()
-                    .into(ivProfile);
+            if (provider.profileImageUrl.length() > 500) { // Likely Base64
+                ivProfile.setImageBitmap(com.example.localconnect.util.ImageUtil.fromBase64(provider.profileImageUrl));
+            } else {
+                com.bumptech.glide.Glide.with(this)
+                        .load(provider.profileImageUrl)
+                        .placeholder(com.example.localconnect.R.drawable.ic_profile)
+                        .circleCrop()
+                        .into(ivProfile);
+            }
         }
 
         RatingBar ratingBar = findViewById(R.id.ratingBar);
