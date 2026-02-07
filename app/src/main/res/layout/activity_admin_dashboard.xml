@@ -32,6 +32,18 @@
                 android:layout_centerVertical="true"/>
 
             <ImageButton
+                android:id="@+id/btnAdminProfile"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_toStartOf="@+id/btnHome"
+                android:layout_marginEnd="8dp"
+                android:src="@android:drawable/ic_menu_myplaces"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/white"
+                android:layout_centerVertical="true"
+                android:contentDescription="Profile" />
+
+            <ImageButton
                 android:id="@+id/btnHome"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
@@ -64,6 +76,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Post New Notice"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnManageMandatoryServices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Manage Mandatory Services"
         android:layout_marginBottom="16dp"/>
 
     <Button

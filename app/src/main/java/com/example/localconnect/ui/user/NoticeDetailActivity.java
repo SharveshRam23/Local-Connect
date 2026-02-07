@@ -35,6 +35,8 @@ public class NoticeDetailActivity extends AppCompatActivity {
     private String noticeTitle;
     private String noticeContent;
     private long noticeTime;
+    private boolean hasAudio;
+    private String audioUrl;
 
     @javax.inject.Inject
     com.example.localconnect.data.dao.CommentDao commentDao;
@@ -55,6 +57,8 @@ public class NoticeDetailActivity extends AppCompatActivity {
             noticeTitle = getIntent().getStringExtra("notice_title");
             noticeContent = getIntent().getStringExtra("notice_content");
             noticeTime = getIntent().getLongExtra("notice_time", 0);
+            hasAudio = getIntent().getBooleanExtra("notice_has_audio", false);
+            audioUrl = getIntent().getStringExtra("notice_audio_url");
         }
 
         if (noticeId == null) {
@@ -71,6 +75,18 @@ public class NoticeDetailActivity extends AppCompatActivity {
         binding.tvDetailContent.setText(noticeContent);
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
         binding.tvDetailTime.setText(sdf.format(new Date(noticeTime)));
+
+        if (hasAudio && !TextUtils.isEmpty(audioUrl)) {
+            binding.btnPlayAudio.setVisibility(View.VISIBLE);
+            binding.btnPlayAudio.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(this, com.example.localconnect.service.MediaPlaybackService.class);
+                intent.setAction("PLAY_NOTICE_AUDIO");
+                intent.putExtra("EXTRA_AUDIO_URL", audioUrl);
+                intent.putExtra("EXTRA_NOTICE_TITLE", noticeTitle);
+                startForegroundService(intent);
+                Toast.makeText(this, "Starting audio playback...", Toast.LENGTH_SHORT).show();
+            });
+        }
 
         binding.btnPostComment.setOnClickListener(v -> postComment());
     }

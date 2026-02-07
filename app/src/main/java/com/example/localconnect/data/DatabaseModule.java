@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.localconnect.data.dao.BookingDao;
 import com.example.localconnect.data.dao.IssueDao;
+import com.example.localconnect.data.dao.MandatoryServiceDao;
 import com.example.localconnect.data.dao.NoticeDao;
 import com.example.localconnect.data.dao.ProviderDao;
 import com.example.localconnect.data.dao.RatingDao;
@@ -60,5 +61,10 @@ public class DatabaseModule {
     @Provides
     public RatingDao provideRatingDao(AppDatabase database) {
         return database.ratingDao();
+    }
+
+    @Provides
+    public MandatoryServiceDao provideMandatoryServiceDao(AppDatabase database) {
+        return database.mandatoryServiceDao();
     }
 }

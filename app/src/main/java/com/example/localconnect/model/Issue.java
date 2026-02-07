@@ -18,6 +18,20 @@ public class Issue {
     public String adminResponse;
     public String reporterName;
 
+    // Geofence fields
+    public Double latitude;
+    public Double longitude;
+
+    // Forwarding fields
+    public boolean isForwarded;
+    public String forwardedDepartment;
+    public String forwardedOfficerName;
+    public String forwardedContact;
+    public String forwardedEmail;
+    public long forwardedDate;
+    public String adminNote;
+    public String authorityResponse;
+
     // Required for Firestore
     public Issue() {}
 

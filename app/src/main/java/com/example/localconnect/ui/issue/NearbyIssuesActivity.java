@@ -43,7 +43,9 @@ public class NearbyIssuesActivity extends AppCompatActivity {
         rvIssues.setLayoutManager(new LinearLayoutManager(this));
         
         adapter = new IssueAdapter(issue -> {
-            // Optional: View detail if needed
+            android.content.Intent intent = new android.content.Intent(this, com.example.localconnect.ui.user.UserIssueDetailActivity.class);
+            intent.putExtra("issue_id", issue.id);
+            startActivity(intent);
         });
         rvIssues.setAdapter(adapter);
 

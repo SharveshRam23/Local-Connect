@@ -27,6 +27,10 @@ public class ServiceProvider {
     public String bio;
     public String address;
 
+    // Geofence fields
+    public Double latitude;
+    public Double longitude;
+
     // Rating fields
     public float rating; // Average rating (0-5)
     public int ratingCount; // Number of ratings

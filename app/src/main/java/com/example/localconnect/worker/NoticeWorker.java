@@ -30,7 +30,7 @@ public class NoticeWorker extends Worker {
             // Check Firestore for new notices since lastCheckTime
             com.google.firebase.firestore.FirebaseFirestore firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance();
             firestore.collection("notices")
-                    .whereGreaterThan("timestamp", lastCheckTime)
+                    .whereGreaterThan("scheduledTime", lastCheckTime)
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         if (!queryDocumentSnapshots.isEmpty()) {

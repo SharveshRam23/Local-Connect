@@ -14,6 +14,7 @@ import com.example.localconnect.data.dao.RatingDao;
 import com.example.localconnect.data.dao.UserDao;
 import com.example.localconnect.model.Booking;
 import com.example.localconnect.model.Issue;
+import com.example.localconnect.model.MandatoryService;
 import com.example.localconnect.model.Notice;
 import com.example.localconnect.model.Rating;
 import com.example.localconnect.model.ServiceProvider;
@@ -23,7 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Database(entities = { User.class, ServiceProvider.class, Notice.class,
-        Issue.class, Booking.class, com.example.localconnect.model.Comment.class, Rating.class }, version = 8, exportSchema = false)
+        Issue.class, Booking.class, com.example.localconnect.model.Comment.class, Rating.class, MandatoryService.class }, version = 10, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UserDao userDao();
@@ -39,6 +40,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract com.example.localconnect.data.dao.CommentDao commentDao();
 
     public abstract RatingDao ratingDao();
+
+    public abstract com.example.localconnect.data.dao.MandatoryServiceDao mandatoryServiceDao();
 
     private static volatile AppDatabase INSTANCE;
     private static final int NUMBER_OF_THREADS = 4;

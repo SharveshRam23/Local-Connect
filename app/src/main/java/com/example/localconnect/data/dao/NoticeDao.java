@@ -1,9 +1,11 @@
 package com.example.localconnect.data.dao;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.example.localconnect.model.Notice;
 
@@ -19,4 +21,10 @@ public interface NoticeDao {
 
     @Query("SELECT * FROM notices ORDER BY scheduledTime DESC")
     List<Notice> getAllNotices(); // For Admin
+
+    @Update
+    void update(Notice notice);
+
+    @Delete
+    void delete(Notice notice);
 }

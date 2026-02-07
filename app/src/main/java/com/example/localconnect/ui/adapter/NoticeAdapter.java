@@ -20,6 +20,13 @@ import java.util.Locale;
 public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.NoticeViewHolder> {
 
     private List<Notice> notices = new ArrayList<>();
+    private OnNoticeActionListener listener;
+    private boolean isAdmin = false;
+
+    public interface OnNoticeActionListener {
+        void onEdit(Notice notice);
+        void onDelete(Notice notice);
+    }
 
     public void setNotices(List<Notice> notices) {
         if (notices == null) {
@@ -27,6 +34,15 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.NoticeView
         } else {
             this.notices = notices;
         }
+        notifyDataSetChanged();
+    }
+
+    public void setOnNoticeActionListener(OnNoticeActionListener listener) {
+        this.listener = listener;
+    }
+
+    public void setIsAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
         notifyDataSetChanged();
     }
 
@@ -40,7 +56,7 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.NoticeView
     @Override
     public void onBindViewHolder(@NonNull NoticeViewHolder holder, int position) {
         Notice notice = notices.get(position);
-        holder.bind(notice);
+        holder.bind(notice, isAdmin, listener);
     }
 
     @Override
@@ -52,30 +68,49 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.NoticeView
         private final TextView tvTitle;
         private final TextView tvContent;
         private final TextView tvTime;
+        private final View llAdminActions;
+        private final View btnEdit;
+        private final View btnDelete;
 
         public NoticeViewHolder(@NonNull View itemView) {
             super(itemView);
             tvTitle = itemView.findViewById(R.id.tvNoticeTitle);
             tvContent = itemView.findViewById(R.id.tvNoticeContent);
             tvTime = itemView.findViewById(R.id.tvNoticeTime);
+            llAdminActions = itemView.findViewById(R.id.llAdminActions);
+            btnEdit = itemView.findViewById(R.id.btnEditNotice);
+            btnDelete = itemView.findViewById(R.id.btnDeleteNotice);
         }
 
-        public void bind(Notice notice) {
+        public void bind(Notice notice, boolean isAdmin, OnNoticeActionListener listener) {
             tvTitle.setText(notice.title);
             tvContent.setText(notice.content);
 
             SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
             tvTime.setText(sdf.format(new Date(notice.scheduledTime)));
 
-            itemView.setOnClickListener(v -> {
-                android.content.Context context = v.getContext();
-                android.content.Intent intent = new android.content.Intent(context, com.example.localconnect.ui.user.NoticeDetailActivity.class);
-                intent.putExtra("notice_id", notice.id);
-                intent.putExtra("notice_title", notice.title);
-                intent.putExtra("notice_content", notice.content);
-                intent.putExtra("notice_time", notice.scheduledTime);
-                context.startActivity(intent);
-            });
+            if (isAdmin) {
+                llAdminActions.setVisibility(View.VISIBLE);
+                btnEdit.setOnClickListener(v -> {
+                    if (listener != null) listener.onEdit(notice);
+                });
+                btnDelete.setOnClickListener(v -> {
+                    if (listener != null) listener.onDelete(notice);
+                });
+            } else {
+                llAdminActions.setVisibility(View.GONE);
+                itemView.setOnClickListener(v -> {
+                    android.content.Context context = v.getContext();
+                    android.content.Intent intent = new android.content.Intent(context, com.example.localconnect.ui.user.NoticeDetailActivity.class);
+                    intent.putExtra("notice_id", notice.id);
+                    intent.putExtra("notice_title", notice.title);
+                    intent.putExtra("notice_content", notice.content);
+                    intent.putExtra("notice_time", notice.scheduledTime);
+                    intent.putExtra("notice_has_audio", notice.hasAudio);
+                    intent.putExtra("notice_audio_url", notice.audioUrl);
+                    context.startActivity(intent);
+                });
+            }
         }
     }
 }

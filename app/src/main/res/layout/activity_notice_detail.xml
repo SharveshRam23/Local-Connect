@@ -60,7 +60,17 @@
         android:layout_height="wrap_content"
         android:text="Notice content goes here..."
         android:textSize="16sp"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnPlayAudio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Play Audio Announcement"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="24dp"
+        android:visibility="gone"
+        app:icon="@drawable/ic_media_play"/>
 
     <View
         android:layout_width="match_parent"

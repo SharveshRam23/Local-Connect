@@ -12,6 +12,10 @@
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
         android:name=".LocalConnectApp"
@@ -66,6 +70,14 @@
 
         <activity
             android:name=".ui.user.UserHomeActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.user.EssentialServicesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.user.MandatoryServiceDetailActivity"
             android:exported="false" />
 
         <activity
@@ -134,6 +146,37 @@
             android:name=".ui.admin.AdminIssueDetailActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.admin.AdminProfileActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.admin.ManageMandatoryServicesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.admin.AddMandatoryServiceActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.user.UserIssueDetailActivity"
+            android:exported="false" />
+
+        <service
+            android:name=".service.MediaPlaybackService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name=".receiver.GeofenceReceiver"
+            android:enabled="true"
+            android:exported="true" />
     </application>
 
 </manifest>

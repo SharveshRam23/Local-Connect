@@ -16,6 +16,15 @@ public class Notice {
     public String targetPincode; // Null for global
     public long scheduledTime;
 
+    // Audio fields
+    public String audioUrl;
+    public boolean hasAudio;
+
+    // Geofence fields
+    public Double latitude;
+    public Double longitude;
+    public boolean isGeofenceEnabled;
+
     // Required for Firestore
     public Notice() {}
 
@@ -27,6 +36,8 @@ public class Notice {
         this.type = type;
         this.targetPincode = targetPincode;
         this.scheduledTime = scheduledTime;
+        this.hasAudio = false;
+        this.isGeofenceEnabled = false;
     }
 
     @Ignore

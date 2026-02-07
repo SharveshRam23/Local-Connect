@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="service_categories">
+        <item>HOSPITAL</item>
+        <item>PHARMACY</item>
+        <item>POLICE STATION</item>
+        <item>AMBULANCE</item>
+        <item>BLOOD BANK</item>
+        <item>FIRE STATION</item>
+        <item>OTHER</item>
+    </string-array>
+    <string-array name="authority_departments">
+        <item>Municipality (Waste/Garbage)</item>
+        <item>Water Board</item>
+        <item>Electricity Board</item>
+        <item>Road Maintenance</item>
+        <item>Police Department</item>
+        <item>Health Department</item>
+        <item>Other</item>
+    </string-array>
+</resources>

@@ -101,10 +101,20 @@
                     android:padding="16dp">
 
                     <Button
+                        android:id="@+id/btnEssentialServices"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Essential Services (Hospital, Police)"
+                        android:layout_marginBottom="12dp"
+                        android:backgroundTint="#D32F2F"
+                        android:textColor="@color/white"
+                        app:icon="@android:drawable/ic_menu_compass"/>
+
+                    <Button
                         android:id="@+id/btnFindServices"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Find Services Nearby"
+                        android:text="Find Providers (Plumber, etc.)"
                         android:layout_marginBottom="12dp"
                         app:icon="@drawable/ic_location"/>
 

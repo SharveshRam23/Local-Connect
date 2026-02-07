@@ -72,4 +72,9 @@ dependencies {
     
     // Guava for ListenableFuture (required by WorkManager)
     implementation("com.google.guava:guava:31.1-android")
+
+    // Media3
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
+    implementation(libs.media3.session)
 }

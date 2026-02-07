@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/etNoticeTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Notice Title (e.g., Emergency Alert)"
+            android:inputType="textCapWords" />
+
+        <EditText
+            android:id="@+id/etNoticeContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Content/Message"
+            android:inputType="textMultiLine"
+            android:minLines="3"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/etAudioUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Audio URL (Optional)"
+            android:inputType="textUri"
+            android:layout_marginTop="8dp" />
+
+        <CheckBox
+            android:id="@+id/cbGeofence"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enable Geofence Alert"
+            android:layout_marginTop="8dp" />
+
+        <LinearLayout
+            android:id="@+id/llLocationInputs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_marginTop="4dp">
+
+            <EditText
+                android:id="@+id/etLatitude"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Lat (e.g., 12.97)"
+                android:inputType="numberDecimal|numberSigned" />
+
+            <EditText
+                android:id="@+id/etLongitude"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Lng (e.g., 77.59)"
+                android:inputType="numberDecimal|numberSigned"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

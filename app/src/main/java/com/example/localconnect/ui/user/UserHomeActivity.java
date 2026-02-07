@@ -29,6 +29,11 @@ public class UserHomeActivity extends AppCompatActivity {
     @javax.inject.Inject
     com.google.firebase.firestore.FirebaseFirestore firestore;
 
+    @javax.inject.Inject
+    com.example.localconnect.data.dao.MandatoryServiceDao mandatoryServiceDao;
+
+    private com.example.localconnect.util.GeofenceHelper geofenceHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +41,10 @@ public class UserHomeActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.rvNotices.setLayoutManager(new LinearLayoutManager(this));
+
+        binding.btnEssentialServices.setOnClickListener(v -> {
+            startActivity(new Intent(UserHomeActivity.this, EssentialServicesActivity.class));
+        });
 
         binding.btnFindServices.setOnClickListener(v -> {
             startActivity(new Intent(UserHomeActivity.this, ServiceListActivity.class));
@@ -69,6 +78,18 @@ public class UserHomeActivity extends AppCompatActivity {
 
         loadUserData();
         loadNotices();
+        setupGeofences();
+    }
+
+    private void setupGeofences() {
+        geofenceHelper = new com.example.localconnect.util.GeofenceHelper(this);
+        // Load services and add geofences
+         com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+            List<com.example.localconnect.model.MandatoryService> services = mandatoryServiceDao.getAllServices();
+            if (services != null && !services.isEmpty()) {
+                runOnUiThread(() -> geofenceHelper.addGeofencesForServices(services));
+            }
+         });
     }
 
     @javax.inject.Inject
@@ -133,7 +154,7 @@ public class UserHomeActivity extends AppCompatActivity {
 
         // Fetch from Firestore
         firestore.collection("notices")
-                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .orderBy("scheduledTime", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Notice> notices = queryDocumentSnapshots.toObjects(Notice.class);
