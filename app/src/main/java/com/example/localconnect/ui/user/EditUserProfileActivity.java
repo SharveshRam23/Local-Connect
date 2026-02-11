@@ -134,7 +134,7 @@ public class EditUserProfileActivity extends AppCompatActivity {
             String base64Image = com.example.localconnect.util.ImageUtil.toBase64Aggressive(bitmap);
             
             if (currentUser != null) {
-                currentUser.profileImageUrl = base64Image;
+                currentUser.profileImageUrl = "data:image/jpeg;base64," + base64Image;
             }
             saveProfile();
         } catch (Exception e) {

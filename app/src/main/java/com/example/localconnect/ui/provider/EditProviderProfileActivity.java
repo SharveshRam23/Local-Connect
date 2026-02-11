@@ -130,7 +130,7 @@ public class EditProviderProfileActivity extends AppCompatActivity {
             String base64Image = com.example.localconnect.util.ImageUtil.toBase64Aggressive(bitmap);
             
             if (currentProvider != null) {
-                currentProvider.profileImageUrl = base64Image;
+                currentProvider.profileImageUrl = "data:image/jpeg;base64," + base64Image;
             }
             saveProfile();
         } catch (Exception e) {
