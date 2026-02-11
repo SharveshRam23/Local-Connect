@@ -30,6 +30,10 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
     @javax.inject.Inject
     com.example.localconnect.data.dao.ProviderDao providerDao;
 
+
+    private com.google.android.material.textfield.TextInputLayout tilCustomCategory;
+    private TextInputEditText etCustomCategory;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,10 +46,27 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
         etExperience = findViewById(R.id.etProviderExperience);
         spinnerCategory = findViewById(R.id.spinnerProviderCategory);
         btnRegister = findViewById(R.id.btnProviderRegister);
+        
+        tilCustomCategory = findViewById(R.id.tilProviderCustomCategory);
+        etCustomCategory = findViewById(R.id.etProviderCustomCategory);
 
         setupSpinner();
 
         btnRegister.setOnClickListener(v -> registerProvider());
+        
+        findViewById(R.id.btnDetectProviderLocation).setOnClickListener(v -> {
+            com.example.localconnect.util.LocationHelper helper = new com.example.localconnect.util.LocationHelper(this);
+            helper.getCurrentPincode(this, new com.example.localconnect.util.LocationHelper.LocationResultListener() {
+                @Override
+                public void onLocationFound(String pincode) {
+                    etPincode.setText(pincode);
+                }
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(ProviderRegistrationActivity.this, error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
     }
 
     private void setupSpinner() {
@@ -53,6 +74,22 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCategory.setAdapter(adapter);
+
+        spinnerCategory.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
+                String selected = parent.getItemAtPosition(position).toString();
+                if ("Other".equalsIgnoreCase(selected)) {
+                    tilCustomCategory.setVisibility(android.view.View.VISIBLE);
+                } else {
+                    tilCustomCategory.setVisibility(android.view.View.GONE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+            }
+        });
     }
 
     private void registerProvider() {
@@ -60,8 +97,19 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
         String phone = etPhone.getText().toString().trim();
         String pincode = etPincode.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
-        String category = spinnerCategory.getSelectedItem().toString();
+        String selectedCategory = spinnerCategory.getSelectedItem().toString();
         String experience = etExperience != null ? etExperience.getText().toString().trim() : "0";
+        String finalCategory = selectedCategory;
+
+        if ("Other".equalsIgnoreCase(selectedCategory)) {
+            finalCategory = etCustomCategory.getText().toString().trim();
+            if (TextUtils.isEmpty(finalCategory)) {
+                tilCustomCategory.setError("Please specify category");
+                return;
+            } else {
+                tilCustomCategory.setError(null);
+            }
+        }
 
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(phone) || TextUtils.isEmpty(pincode)
                 || TextUtils.isEmpty(password)) {
@@ -69,7 +117,7 @@ public class ProviderRegistrationActivity extends AppCompatActivity {
             return;
         }
 
-        ServiceProvider provider = new ServiceProvider(name, category, pincode, phone, password, experience);
+        ServiceProvider provider = new ServiceProvider(name, finalCategory, pincode, phone, password, experience);
 
         // First, check if provider exists in Firestore
         firestore.collection("service_providers")

@@ -39,10 +39,8 @@ public class UserIssueDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_issue_detail);
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Issue Details");
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+        // Custom Back Button
+        findViewById(R.id.btnBack).setOnClickListener(v -> onBackPressed());
 
         issueId = getIntent().getStringExtra("issue_id");
 

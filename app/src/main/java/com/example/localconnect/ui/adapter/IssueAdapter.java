@@ -22,7 +22,8 @@ import java.util.Locale;
 
 public class IssueAdapter extends RecyclerView.Adapter<IssueAdapter.IssueViewHolder> {
 
-    private List<Issue> issues = new ArrayList<>();
+    private boolean isAdmin = false;
+    private List<Issue> issues = new java.util.ArrayList<>();
     private OnIssueClickListener clickListener;
 
     public interface OnIssueClickListener {
@@ -33,6 +34,10 @@ public class IssueAdapter extends RecyclerView.Adapter<IssueAdapter.IssueViewHol
         this.clickListener = listener;
     }
 
+    public void setIsAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
+
     public void setIssues(List<Issue> issues) {
         this.issues = issues;
         notifyDataSetChanged();
@@ -41,7 +46,8 @@ public class IssueAdapter extends RecyclerView.Adapter<IssueAdapter.IssueViewHol
     @NonNull
     @Override
     public IssueViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_issue, parent, false);
+        int layoutRes = isAdmin ? R.layout.item_issue_admin : R.layout.item_issue;
+        View view = LayoutInflater.from(parent.getContext()).inflate(layoutRes, parent, false);
         return new IssueViewHolder(view);
     }
 
@@ -67,11 +73,13 @@ public class IssueAdapter extends RecyclerView.Adapter<IssueAdapter.IssueViewHol
             }
         }
 
-        if (issue.adminResponse != null && !issue.adminResponse.isEmpty()) {
-            holder.llAdminResponse.setVisibility(View.VISIBLE);
-            holder.tvAdminComment.setText(issue.adminResponse);
-        } else {
-            holder.llAdminResponse.setVisibility(View.GONE);
+        if (holder.llAdminResponse != null && holder.tvAdminComment != null) {
+            if (issue.adminResponse != null && !issue.adminResponse.isEmpty()) {
+                holder.llAdminResponse.setVisibility(View.VISIBLE);
+                holder.tvAdminComment.setText(issue.adminResponse);
+            } else {
+                holder.llAdminResponse.setVisibility(View.GONE);
+            }
         }
 
         holder.itemView.setOnClickListener(v -> {

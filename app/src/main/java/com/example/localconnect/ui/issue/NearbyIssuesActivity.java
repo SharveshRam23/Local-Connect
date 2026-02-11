@@ -49,6 +49,8 @@ public class NearbyIssuesActivity extends AppCompatActivity {
         });
         rvIssues.setAdapter(adapter);
 
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        
         loadNearbyIssues();
     }
 

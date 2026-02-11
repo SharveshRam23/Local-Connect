@@ -51,11 +51,6 @@ public class AdminIssueDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_issue_detail);
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Issue Details (Cloud)");
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-
         issueId = getIntent().getStringExtra("issue_id");
 
         ivImage = findViewById(R.id.ivDetailImage);
@@ -76,6 +71,7 @@ public class AdminIssueDetailActivity extends AppCompatActivity {
 
         btnUpdate.setOnClickListener(v -> updateIssue());
         btnForward.setOnClickListener(v -> showForwardDialog());
+        findViewById(R.id.btnBack).setOnClickListener(v -> onBackPressed());
     }
 
     private void loadIssueDetails() {

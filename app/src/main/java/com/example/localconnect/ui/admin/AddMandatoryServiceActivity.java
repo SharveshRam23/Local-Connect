@@ -36,11 +36,16 @@ public class AddMandatoryServiceActivity extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 101;
     private static final int LOCATION_PERMISSION_REQUEST = 1002;
 
+    private androidx.activity.result.ActivityResultLauncher<Intent> mapPickerLauncher;
+
     @javax.inject.Inject
     MandatoryServiceDao serviceDao;
 
     @javax.inject.Inject
     FirebaseFirestore firestore;
+
+    private com.google.android.material.textfield.TextInputLayout tilCustomCategory;
+    private com.google.android.material.textfield.TextInputEditText etCustomCategory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +53,16 @@ public class AddMandatoryServiceActivity extends AppCompatActivity {
         binding = ActivityAddMandatoryServiceBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Initialize custom category views manually as they were added to layout but might not be in binding yet if not re-generated
+        // Or if using ViewBinding, we can access them directly if the binding class is updated. 
+        // Assuming binding is updated or we use findViewById for new views if binding class isn't re-generated in this environment logic.
+        // For safety in this environment, I'll use findViewById for the new views to be sure, or rely on binding if I could trust it's regenerated.
+        // Let's rely on finding them by ID to be safe with the binding object potentially being stale.
+        tilCustomCategory = findViewById(R.id.tilCustomCategory);
+        etCustomCategory = findViewById(R.id.etCustomCategory);
+
         setupCategorySpinner();
+        setupMapPickerLauncher();
 
         serviceIdToEdit = getIntent().getStringExtra("service_id");
         if (serviceIdToEdit != null) {
@@ -57,8 +71,39 @@ public class AddMandatoryServiceActivity extends AppCompatActivity {
         }
 
         binding.btnPickLocation.setOnClickListener(v -> checkLocationPermission());
+        binding.btnPickOnMap.setOnClickListener(v -> launchMapPicker());
         binding.btnUploadImage.setOnClickListener(v -> openImagePicker());
         binding.btnSaveService.setOnClickListener(v -> saveService());
+    }
+
+    private void setupMapPickerLauncher() {
+        mapPickerLauncher = registerForActivityResult(
+                new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        double lat = result.getData().getDoubleExtra("lat", 0.0);
+                        double lng = result.getData().getDoubleExtra("lng", 0.0);
+                        binding.etLatitude.setText(String.valueOf(lat));
+                        binding.etLongitude.setText(String.valueOf(lng));
+                        Toast.makeText(this, "Location selected: " + lat + ", " + lng, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void launchMapPicker() {
+        Intent intent = new Intent(this, PickLocationActivity.class);
+        // Pass current coordinates if available
+        String latStr = binding.etLatitude.getText().toString().trim();
+        String lngStr = binding.etLongitude.getText().toString().trim();
+        if (!latStr.isEmpty() && !lngStr.isEmpty()) {
+            try {
+                intent.putExtra("lat", Double.parseDouble(latStr));
+                intent.putExtra("lng", Double.parseDouble(lngStr));
+            } catch (NumberFormatException e) {
+                // Use default coordinates
+            }
+        }
+        mapPickerLauncher.launch(intent);
     }
 
     private void setupCategorySpinner() {
@@ -66,6 +111,22 @@ public class AddMandatoryServiceActivity extends AppCompatActivity {
                 R.array.service_categories, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinnerCategory.setAdapter(adapter);
+
+        binding.spinnerCategory.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
+                String selected = parent.getItemAtPosition(position).toString();
+                if ("OTHER".equalsIgnoreCase(selected)) {
+                    tilCustomCategory.setVisibility(android.view.View.VISIBLE);
+                } else {
+                    tilCustomCategory.setVisibility(android.view.View.GONE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+            }
+        });
     }
 
     private void loadServiceData(String id) {
@@ -96,8 +157,22 @@ public class AddMandatoryServiceActivity extends AppCompatActivity {
 
         // Set spinner selection
         ArrayAdapter adapter = (ArrayAdapter) binding.spinnerCategory.getAdapter();
+        
+        // Check if category is in the standard list
         int pos = adapter.getPosition(service.category);
-        binding.spinnerCategory.setSelection(pos);
+        if (pos >= 0) {
+            binding.spinnerCategory.setSelection(pos);
+            tilCustomCategory.setVisibility(android.view.View.GONE);
+        } else {
+            // It's a custom category, select "OTHER" and fill text box
+            int otherPos = adapter.getPosition("OTHER");
+            if (otherPos < 0) otherPos = adapter.getPosition("Other"); // Case safety
+            if (otherPos >= 0) {
+                binding.spinnerCategory.setSelection(otherPos);
+                tilCustomCategory.setVisibility(android.view.View.VISIBLE);
+                etCustomCategory.setText(service.category);
+            }
+        }
     }
 
     private void checkLocationPermission() {
@@ -147,7 +222,19 @@ public class AddMandatoryServiceActivity extends AppCompatActivity {
 
     private void saveService() {
         String name = binding.etServiceName.getText().toString().trim();
-        String category = binding.spinnerCategory.getSelectedItem().toString();
+        String selectedCategory = binding.spinnerCategory.getSelectedItem().toString();
+        String finalCategory = selectedCategory;
+        
+        if ("OTHER".equalsIgnoreCase(selectedCategory) && etCustomCategory != null) {
+            finalCategory = etCustomCategory.getText().toString().trim();
+            if (TextUtils.isEmpty(finalCategory)) {
+                tilCustomCategory.setError("Please specify category");
+                return;
+            } else {
+                tilCustomCategory.setError(null);
+            }
+        }
+
         String address = binding.etAddress.getText().toString().trim();
         String pincode = binding.etPincode.getText().toString().trim();
         String latStr = binding.etLatitude.getText().toString().trim();
@@ -166,7 +253,7 @@ public class AddMandatoryServiceActivity extends AppCompatActivity {
         double lng = Double.parseDouble(lngStr);
 
         String id = serviceIdToEdit != null ? serviceIdToEdit : UUID.randomUUID().toString();
-        MandatoryService service = new MandatoryService(id, name, category, address, pincode, lat, lng,
+        MandatoryService service = new MandatoryService(id, name, finalCategory, address, pincode, lat, lng,
                 phone, null, hours, is24x7, isEmergency, true, encodedImage, System.currentTimeMillis());
 
         firestore.collection("mandatory_services").document(id)

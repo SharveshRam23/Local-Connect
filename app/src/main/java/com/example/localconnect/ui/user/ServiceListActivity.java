@@ -35,6 +35,8 @@ public class ServiceListActivity extends AppCompatActivity {
         binding = ActivityServiceListBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        binding.btnBack.setOnClickListener(v -> onBackPressed());
+
         binding.rvProviders.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ProviderAdapter(provider -> {
             Intent intent = new Intent(this, ProviderProfileActivity.class);

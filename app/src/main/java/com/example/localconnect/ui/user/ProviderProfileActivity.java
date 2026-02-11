@@ -117,7 +117,7 @@ public class ProviderProfileActivity extends AppCompatActivity {
         if (currentProvider == null) return;
         
         binding.tvName.setText(currentProvider.name);
-        binding.tvCategory.setText("Category: " + currentProvider.category);
+        binding.chipCategory.setText(currentProvider.category);
         binding.tvExperience.setText("Experience: " + currentProvider.experience + " Years");
         binding.tvPhone.setText("Phone: " + currentProvider.phone);
         

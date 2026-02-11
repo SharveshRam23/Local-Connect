@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.localconnect.R;
 import com.example.localconnect.databinding.ActivityManageMandatoryServicesBinding;
 import com.example.localconnect.data.AppDatabase;
 import com.example.localconnect.data.dao.MandatoryServiceDao;
@@ -41,17 +42,13 @@ public class ManageMandatoryServicesActivity extends AppCompatActivity {
         binding = ActivityManageMandatoryServicesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        setSupportActionBar(binding.toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        binding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
-
         setupRecyclerView();
 
         binding.fabAddService.setOnClickListener(v -> {
             startActivity(new Intent(this, AddMandatoryServiceActivity.class));
         });
+
+        findViewById(R.id.btnBack).setOnClickListener(v -> onBackPressed());
 
         loadServices();
     }

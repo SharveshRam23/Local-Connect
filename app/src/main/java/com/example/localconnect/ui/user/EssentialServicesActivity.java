@@ -15,7 +15,6 @@ import com.example.localconnect.data.dao.MandatoryServiceDao;
 import com.example.localconnect.databinding.ActivityEssentialServicesBinding;
 import com.example.localconnect.model.MandatoryService;
 import com.example.localconnect.ui.adapter.MandatoryServiceAdapter;
-import com.example.localconnect.util.LocationHelper;
 import com.google.android.material.chip.Chip;
 
 import java.util.ArrayList;
@@ -40,17 +39,18 @@ public class EssentialServicesActivity extends AppCompatActivity {
         binding = ActivityEssentialServicesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        setSupportActionBar(binding.toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        binding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        // Back button listener
+        binding.btnBack.setOnClickListener(v -> onBackPressed());
 
         // Get Pincode from Prefs first
         SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
         currentPincode = prefs.getString("user_pincode", "");
         
-        binding.tvLocationInfo.setText("Showing services for Pincode: " + currentPincode);
+        if (currentPincode != null && !currentPincode.isEmpty()) {
+            binding.tvLocationInfo.setText("📍 Showing services for Pincode: " + currentPincode);
+        } else {
+            binding.tvLocationInfo.setText("📍 Showing all services");
+        }
 
         setupRecyclerView();
         setupFilters();
@@ -91,7 +91,7 @@ public class EssentialServicesActivity extends AppCompatActivity {
     private void setupFilters() {
         binding.chipGroupCategories.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == View.NO_ID) {
-                filterList("All");
+                filterList("All Categories");
                 return;
             }
             Chip chip = group.findViewById(checkedId);
@@ -103,10 +103,8 @@ public class EssentialServicesActivity extends AppCompatActivity {
 
     private void loadServices() {
         binding.progressBar.setVisibility(View.VISIBLE);
-        
-        // Load from Room (offline first/always for this task as data is synced via Admin)
-        // Ideally we would trigger a Firestore sync here too, but for now we rely on the Admin syncing or background sync
-        // For User view, we'll read Room.
+        binding.rvServices.setVisibility(View.GONE);
+        binding.tvEmptyState.setVisibility(View.GONE);
         
         AppDatabase.databaseWriteExecutor.execute(() -> {
             List<MandatoryService> services;
@@ -119,15 +117,28 @@ public class EssentialServicesActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 binding.progressBar.setVisibility(View.GONE);
                 if (services == null || services.isEmpty()) {
-                    Toast.makeText(this, "No essential services found for this area.", Toast.LENGTH_SHORT).show();
+                    binding.tvEmptyState.setVisibility(View.VISIBLE);
+                } else {
+                    binding.rvServices.setVisibility(View.VISIBLE);
                 }
                 allLoadedServices = services != null ? services : new ArrayList<>();
-                filterList("All");
+                filterList("All Categories");
             });
         });
     }
 
-    private void filterList(String category) {
+    private void filterList(String categoryText) {
+        // Map chip text to category code if needed, or use text directly
+        // Display text: "🏥 Hospital", "💊 Pharmacy" etc.
+        // Data category: "HOSPITAL", "PHARMACY" etc. Or maybe mixed case.
+        
+        String category = "All";
+        if (categoryText.contains("Hospital")) category = "HOSPITAL";
+        else if (categoryText.contains("Pharmacy")) category = "PHARMACY";
+        else if (categoryText.contains("Police")) category = "POLICE STATION";
+        else if (categoryText.contains("Ambulance")) category = "AMBULANCE";
+        else if (categoryText.contains("All")) category = "All";
+
         if (category.equalsIgnoreCase("All")) {
             adapter.setServices(allLoadedServices);
         } else {
@@ -138,6 +149,13 @@ public class EssentialServicesActivity extends AppCompatActivity {
                 }
             }
             adapter.setServices(filtered);
+            
+            if (filtered.isEmpty()) {
+                binding.tvEmptyState.setVisibility(View.VISIBLE);
+                binding.tvEmptyState.setText("No " + categoryText + " found nearby");
+            } else {
+                binding.tvEmptyState.setVisibility(View.GONE);
+            }
         }
     }
 }

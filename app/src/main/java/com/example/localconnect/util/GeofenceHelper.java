@@ -69,18 +69,22 @@ public class GeofenceHelper {
         }
 
         for (MandatoryService service : services) {
-            if (service.latitude != 0.0 && service.longitude != 0.0) {
-                // Use the private helper or create geofence inline
-                // Reusing createGeofence logic but keeping user's ID format if necessary?
-                // Actually user's ID format was specific: ID|Name
-                // Let's adapt addGeofencesForServices to use the restore generic methods if possible, 
-                // OR just leave it as is but fix the duplication.
-                // The user implementation of addGeofence(MandatoryService) adds ONE by ONE which is inefficient.
-                // Better to batch.
-                // But I will just keep user's method signature and behavior roughly same but fix access.
+            // Validate coordinates: latitude must be -90 to 90, longitude must be -180 to 180
+            if (service.latitude != 0.0 && service.longitude != 0.0 &&
+                isValidLatitude(service.latitude) && isValidLongitude(service.longitude)) {
                 addGeofence(service);
+            } else if (service.latitude != 0.0 || service.longitude != 0.0) {
+                Log.w(TAG, "Skipping geofence for service '" + service.name + "' due to invalid coordinates: lat=" + service.latitude + ", lng=" + service.longitude);
             }
         }
+    }
+
+    private boolean isValidLatitude(double lat) {
+        return lat >= -90.0 && lat <= 90.0;
+    }
+
+    private boolean isValidLongitude(double lng) {
+        return lng >= -180.0 && lng <= 180.0;
     }
 
     private void addGeofence(MandatoryService service) {

@@ -77,4 +77,7 @@ dependencies {
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.ui)
     implementation(libs.media3.session)
+    
+    // OpenStreetMap
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
 }

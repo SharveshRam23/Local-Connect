@@ -135,6 +135,9 @@ public class ReportIssueActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_issue);
 
+        // Custom Back Button
+        findViewById(R.id.btnBack).setOnClickListener(v -> onBackPressed());
+
         imageView = findViewById(R.id.issueImage);
         btnCamera = findViewById(R.id.btnCapture);
         btnGallery = findViewById(R.id.btnGallery);

@@ -48,6 +48,8 @@ public class MyBookingsActivity extends AppCompatActivity implements BookingAdap
         adapter = new BookingAdapter(this);
         recyclerView.setAdapter(adapter);
 
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+
         loadBookings();
     }
 

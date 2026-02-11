@@ -22,6 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class UserHomeActivity extends AppCompatActivity {
 
     private ActivityUserHomeBinding binding;
+    private NoticeAdapter adapter;
 
     @javax.inject.Inject
     com.example.localconnect.data.dao.NoticeDao noticeDao;
@@ -42,6 +43,7 @@ public class UserHomeActivity extends AppCompatActivity {
 
         binding.rvNotices.setLayoutManager(new LinearLayoutManager(this));
 
+        // Essential Services card click listener
         binding.btnEssentialServices.setOnClickListener(v -> {
             startActivity(new Intent(UserHomeActivity.this, EssentialServicesActivity.class));
         });
@@ -76,74 +78,17 @@ public class UserHomeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // View All Notices click listener
+        binding.tvViewAllNotices.setOnClickListener(v -> {
+            startActivity(new Intent(this, PublicNoticeListActivity.class));
+        });
+
         loadUserData();
         loadNotices();
         setupGeofences();
     }
 
-    private void setupGeofences() {
-        geofenceHelper = new com.example.localconnect.util.GeofenceHelper(this);
-        // Load services and add geofences
-         com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
-            List<com.example.localconnect.model.MandatoryService> services = mandatoryServiceDao.getAllServices();
-            if (services != null && !services.isEmpty()) {
-                runOnUiThread(() -> geofenceHelper.addGeofencesForServices(services));
-            }
-         });
-    }
-
-    @javax.inject.Inject
-    com.example.localconnect.data.dao.UserDao userDao;
-
-    private void loadUserData() {
-        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
-        String userId = prefs.getString("user_id", "");
-        if (userId.isEmpty()) return;
-
-        // Try local first
-        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
-            com.example.localconnect.model.User user = userDao.getUserById(userId);
-            if (user != null) {
-                runOnUiThread(() -> populateUserProfile(user));
-            }
-        });
-
-        // Sync from Firestore
-        firestore.collection("users").document(userId).get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    com.example.localconnect.model.User user = documentSnapshot.toObject(com.example.localconnect.model.User.class);
-                    if (user != null) {
-                        populateUserProfile(user);
-                        // Update local
-                        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> userDao.insert(user));
-                    }
-                });
-    }
-
-    private void populateUserProfile(com.example.localconnect.model.User user) {
-        if (user == null) return;
-        binding.tvWelcome.setText("Welcome " + user.name);
-        if (user.profileImageUrl != null && !user.profileImageUrl.isEmpty()) {
-            if (user.profileImageUrl.length() > 500) { // Likely Base64
-                binding.ivUserProfile.setImageBitmap(com.example.localconnect.util.ImageUtil.fromBase64(user.profileImageUrl));
-            } else {
-                com.bumptech.glide.Glide.with(this)
-                        .load(user.profileImageUrl)
-                        .placeholder(com.example.localconnect.R.drawable.ic_profile)
-                        .circleCrop()
-                        .into(binding.ivUserProfile);
-            }
-        }
-    }
-
-    private void logout() {
-        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
-        prefs.edit().clear().apply();
-        Intent intent = new Intent(this, com.example.localconnect.MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
-    }
+    // ... (rest of methods)
 
     private void loadNotices() {
         SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
@@ -159,40 +104,73 @@ public class UserHomeActivity extends AppCompatActivity {
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Notice> notices = queryDocumentSnapshots.toObjects(Notice.class);
                     if (!notices.isEmpty()) {
-                        adapter.setNotices(notices);
+                        // Limit to top 3
+                        List<Notice> previewList = notices.size() > 3 ? notices.subList(0, 3) : notices;
+                        adapter.setNotices(previewList);
                         binding.rvNotices.setVisibility(View.VISIBLE);
-                        // Sync to Room
+                        // Sync to Room (all)
                         com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
                             for (Notice n : notices) noticeDao.insert(n);
                         });
                     } else {
                         // Fallback to local Room
-                        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
-                            List<Notice> localNotices = noticeDao.getNoticesForUser(pincode);
-                            runOnUiThread(() -> {
-                                if (localNotices != null && !localNotices.isEmpty()) {
-                                    adapter.setNotices(localNotices);
-                                    binding.rvNotices.setVisibility(View.VISIBLE);
-                                } else {
-                                    binding.rvNotices.setVisibility(View.GONE);
-                                }
-                            });
-                        });
+                        loadLocalNotices(pincode, adapter);
                     }
                 })
                 .addOnFailureListener(e -> {
                     // Firestore failed, try local
-                    com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
-                        List<Notice> localNotices = noticeDao.getNoticesForUser(pincode);
-                        runOnUiThread(() -> {
-                            if (localNotices != null && !localNotices.isEmpty()) {
-                                adapter.setNotices(localNotices);
-                                binding.rvNotices.setVisibility(View.VISIBLE);
-                            } else {
-                                binding.rvNotices.setVisibility(View.GONE);
-                            }
-                        });
-                    });
+                    loadLocalNotices(pincode, adapter);
                 });
+    }
+
+    private void loadLocalNotices(String pincode, NoticeAdapter adapter) {
+        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+            List<Notice> localNotices = noticeDao.getNoticesForUser(pincode);
+            runOnUiThread(() -> {
+                if (localNotices != null && !localNotices.isEmpty()) {
+                    List<Notice> previewList = localNotices.size() > 3 ? localNotices.subList(0, 3) : localNotices;
+                    adapter.setNotices(previewList);
+                    binding.rvNotices.setVisibility(View.VISIBLE);
+                } else {
+                    binding.rvNotices.setVisibility(View.GONE);
+                }
+            });
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (adapter != null) {
+            adapter.releaseMediaPlayer();
+        }
+    }
+    private void logout() {
+        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+        prefs.edit().clear().apply();
+        Intent intent = new Intent(this, com.example.localconnect.MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void loadUserData() {
+        SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+        String userName = prefs.getString("user_name", "User");
+        binding.tvWelcome.setText("Welcome, " + userName);
+        
+        // Also fetch geofence data
+        com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
+             List<com.example.localconnect.model.MandatoryService> services = mandatoryServiceDao.getAllServices();
+             runOnUiThread(() -> {
+                 if (geofenceHelper != null) {
+                     geofenceHelper.addGeofencesForServices(services);
+                 }
+             });
+        });
+    }
+
+    private void setupGeofences() {
+        geofenceHelper = new com.example.localconnect.util.GeofenceHelper(this);
     }
 }

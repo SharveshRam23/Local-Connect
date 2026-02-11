@@ -37,6 +37,8 @@ public class AdminIssueListActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
+        findViewById(R.id.btnBack).setOnClickListener(v -> onBackPressed());
+
         rvIssues = findViewById(R.id.rvIssues);
         rvIssues.setLayoutManager(new LinearLayoutManager(this));
         
@@ -45,6 +47,7 @@ public class AdminIssueListActivity extends AppCompatActivity {
             intent.putExtra("issue_id", issue.id);
             startActivity(intent);
         });
+        adapter.setIsAdmin(true);
         rvIssues.setAdapter(adapter);
     }
 

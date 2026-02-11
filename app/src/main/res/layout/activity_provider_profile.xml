@@ -4,33 +4,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/gradient_background"
-    android:gravity="center_horizontal">
+    android:background="@color/colorSurface">
 
     <!-- Premium Header -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:cardElevation="4dp"
+        app:cardElevation="8dp"
         app:cardCornerRadius="0dp"
         app:cardBackgroundColor="@color/colorPrimary">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:padding="20dp"
+            android:background="@drawable/gradient_background">
 
             <ImageButton
                 android:id="@+id/btnBack"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@drawable/ic_home"
-                android:rotation="180"
+                android:src="@drawable/ic_back"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 app:tint="@color/white"
                 android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true"
+                android:contentDescription="Back"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -45,9 +44,10 @@
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -55,24 +55,27 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Profile Overview Card -->
+            <!-- Profile Standard Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/PremiumCard">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp"
+                    android:padding="24dp"
                     android:gravity="center_horizontal">
 
                     <androidx.cardview.widget.CardView
                         android:layout_width="100dp"
                         android:layout_height="100dp"
                         app:cardCornerRadius="50dp"
-                        app:cardElevation="2dp"
+                        app:cardElevation="4dp"
                         android:layout_marginBottom="16dp">
                         <ImageView
                             android:id="@+id/ivProfile"
@@ -87,16 +90,20 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Provider Name"
-                        style="@style/HeaderTitle"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorOnSurface"
                         android:layout_marginBottom="4dp"/>
 
-                    <TextView
-                        android:id="@+id/tvCategory"
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipCategory"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Service Category"
-                        android:textColor="@color/gray_500"
-                        android:textSize="16sp"
+                        style="@style/Widget.MaterialComponents.Chip.Entry"
+                        android:textColor="@color/colorPrimary"
+                        app:chipBackgroundColor="#E3F2FD"
+                        app:chipStrokeWidth="0dp"
                         android:layout_marginBottom="8dp"/>
 
                     <LinearLayout
@@ -108,12 +115,13 @@
                         
                         <RatingBar
                             android:id="@+id/ratingBar"
+                            style="?android:attr/ratingBarStyleSmall"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:numStars="5"
                             android:rating="0"
-                            style="@style/Widget.AppCompat.RatingBar.Small"
-                            android:isIndicator="true"/>
+                            android:isIndicator="true"
+                            android:theme="@style/Widget.AppCompat.RatingBar.Small"/>
 
                         <TextView
                             android:id="@+id/tvRating"
@@ -121,6 +129,7 @@
                             android:layout_height="wrap_content"
                             android:text="0.0"
                             android:textSize="14sp"
+                            android:textStyle="bold"
                             android:layout_marginStart="8dp"/>
                     </LinearLayout>
 
@@ -130,108 +139,150 @@
                         android:layout_height="wrap_content"
                         android:text="● Available"
                         android:textStyle="bold"
-                        android:layout_marginBottom="16dp"/>
+                        android:textColor="#4CAF50"
+                        android:background="#E8F5E9"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"/>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Details Card -->
+            <!-- Contact & Details Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/PremiumCard">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Details"
+                        android:text="Contact &amp; Info"
                         android:textStyle="bold"
-                        android:textColor="@color/colorPrimary"
-                        android:layout_marginBottom="12dp"/>
+                        android:textSize="18sp"
+                        android:textColor="@color/colorOnSurface"
+                        android:layout_marginBottom="16dp"/>
 
-                    <TextView
-                        android:id="@+id/tvExperience"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Experience: X Years"
-                        android:layout_marginBottom="8dp"
-                        app:drawableStartCompat="@drawable/ic_launcher_foreground"
-                        android:drawablePadding="8dp"/>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
 
-                    <TextView
-                        android:id="@+id/tvPhone"
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_myplaces"
+                            app:tint="@color/colorAccent"/>
+
+                        <TextView
+                            android:id="@+id/tvExperience"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Experience: X Years"
+                            android:textSize="15sp"
+                            android:layout_marginStart="16dp"
+                            android:textColor="@color/colorOnSurface"/>
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Phone: 1234567890"
-                        android:layout_marginBottom="8dp"
-                        app:drawableStartCompat="@drawable/ic_call"
-                        android:drawablePadding="8dp"
-                        app:drawableTint="@color/colorPrimary"/>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_call"
+                            app:tint="@color/colorAccent"/>
+
+                        <TextView
+                            android:id="@+id/tvPhone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+91 XXXXXXXXXX"
+                            android:textSize="15sp"
+                            android:layout_marginStart="16dp"
+                            android:textColor="@color/colorOnSurface"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnCall"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Call"
+                            app:icon="@drawable/ic_call"
+                            android:layout_marginEnd="8dp"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSms"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Message"
+                            app:icon="@drawable/ic_message"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Actions -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="16dp"
-                android:weightSum="2">
-
-                <Button
-                    android:id="@+id/btnCall"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Call"
-                    android:layout_marginEnd="8dp"
-                    app:icon="@drawable/ic_call"/>
-
-                <Button
-                    android:id="@+id/btnSms"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Message"
-                    app:icon="@drawable/ic_message"/>
-
-            </LinearLayout>
-
-            <Button
+            <!-- Main Action Button -->
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnBookNow"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:text="Book This Service"
-                android:layout_marginTop="12dp"
-                android:padding="16dp"/>
+                android:textSize="16sp"
+                app:cornerRadius="12dp"
+                android:backgroundTint="#26A69A"
+                android:layout_marginBottom="12dp"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRateProvider"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Rate This Provider"
-                android:layout_marginTop="8dp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                android:layout_height="56dp"
+                android:text="Write a Review"
+                android:textSize="16sp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:strokeColor="@color/colorPrimary"
+                app:strokeWidth="1dp"
+                android:textColor="@color/colorPrimary"
+                android:layout_marginBottom="12dp"/>
 
             <TextView
                 android:id="@+id/btnViewAllReviews"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="See All Reviews"
+                android:text="Read All Reviews"
                 android:textAlignment="center"
                 android:textColor="@color/colorAccent"
                 android:textStyle="bold"
                 android:padding="12dp"
-                android:layout_marginTop="8dp"/>
+                android:background="?attr/selectableItemBackground"/>
 
         </LinearLayout>
-    </ScrollView>
-
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>
