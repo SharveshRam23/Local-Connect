@@ -88,6 +88,12 @@ public class UserHomeActivity extends AppCompatActivity {
         setupGeofences();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadUserData();
+    }
+
     // ... (rest of methods)
 
     private void loadNotices() {
@@ -158,6 +164,31 @@ public class UserHomeActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
         String userName = prefs.getString("user_name", "User");
         binding.tvWelcome.setText("Welcome, " + userName);
+
+        String profileImageUrl = prefs.getString("user_profile_image", "");
+        if (!profileImageUrl.isEmpty()) {
+            if (profileImageUrl.startsWith("data:image")) {
+                String cleanBase64 = profileImageUrl;
+                if (cleanBase64.contains(",")) {
+                    cleanBase64 = cleanBase64.substring(cleanBase64.indexOf(",") + 1);
+                }
+                try {
+                    byte[] decodedBytes = android.util.Base64.decode(cleanBase64, android.util.Base64.DEFAULT);
+                    com.bumptech.glide.Glide.with(this)
+                            .asBitmap()
+                            .load(decodedBytes)
+                            .placeholder(com.example.localconnect.R.drawable.ic_profile)
+                            .into(binding.ivUserProfile);
+                } catch (Exception e) {
+                    binding.ivUserProfile.setImageResource(com.example.localconnect.R.drawable.ic_profile);
+                }
+            } else {
+                com.bumptech.glide.Glide.with(this)
+                        .load(profileImageUrl)
+                        .placeholder(com.example.localconnect.R.drawable.ic_profile)
+                        .into(binding.ivUserProfile);
+            }
+        }
         
         // Also fetch geofence data
         com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {

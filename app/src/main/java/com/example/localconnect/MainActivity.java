@@ -26,7 +26,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         android.util.Log.d("LocalConnect", "MainActivity onCreate started");
         
-        // Session Check - auto-redirect if NOT coming from dashboard
+        // Session Check removed per user request to always show home page
+        /*
         boolean fromDashboard = getIntent().getBooleanExtra("from_dashboard", false);
         if (!fromDashboard) {
             SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
+        */
 
         setContentView(R.layout.activity_main);
         

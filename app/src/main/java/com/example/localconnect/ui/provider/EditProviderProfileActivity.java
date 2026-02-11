@@ -166,6 +166,13 @@ public class EditProviderProfileActivity extends AppCompatActivity {
                     com.example.localconnect.data.AppDatabase.databaseWriteExecutor.execute(() -> {
                         providerDao.insert(currentProvider);
                         runOnUiThread(() -> {
+                            // Update SharedPreferences
+                            SharedPreferences prefs = getSharedPreferences("local_connect_prefs", MODE_PRIVATE);
+                            prefs.edit()
+                                    .putString("provider_name", currentProvider.name)
+                                    .putString("provider_profile_image", currentProvider.profileImageUrl)
+                                    .apply();
+
                             Toast.makeText(this, "Profile Updated", Toast.LENGTH_SHORT).show();
                             finish();
                         });

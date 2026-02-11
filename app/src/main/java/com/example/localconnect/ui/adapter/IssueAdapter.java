@@ -10,6 +10,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
+import android.util.Base64;
+
 
 import com.example.localconnect.R;
 import com.example.localconnect.model.Issue;
@@ -62,15 +65,33 @@ public class IssueAdapter extends RecyclerView.Adapter<IssueAdapter.IssueViewHol
         holder.tvDate.setText(sdf.format(new Date(issue.timestamp)));
 
         if (issue.imagePath != null && !issue.imagePath.isEmpty()) {
-            if (issue.imagePath.length() > 200) { // Likely a Base64 string
-                android.graphics.Bitmap bitmap = com.example.localconnect.util.ImageUtil.fromBase64(issue.imagePath);
-                if (bitmap != null) {
-                    holder.ivIssue.setImageBitmap(bitmap);
+            if (issue.imagePath.startsWith("data:image") || issue.imagePath.length() > 200) {
+                // Handle Base64 encoded images
+                String cleanBase64 = issue.imagePath;
+                if (cleanBase64.contains(",")) {
+                    cleanBase64 = cleanBase64.substring(cleanBase64.indexOf(",") + 1);
+                }
+                try {
+                    byte[] decodedBytes = android.util.Base64.decode(cleanBase64, android.util.Base64.DEFAULT);
+                    Glide.with(holder.itemView.getContext())
+                            .asBitmap()
+                            .load(decodedBytes)
+                            .placeholder(R.drawable.placeholder_image)
+                            .error(R.drawable.placeholder_image)
+                            .into(holder.ivIssue);
+                } catch (Exception e) {
+                    holder.ivIssue.setImageResource(R.drawable.placeholder_image);
                 }
             } else {
-                // Use ImageUtil to decode safely (resizing to thumbnail size for list)
-                holder.ivIssue.setImageBitmap(com.example.localconnect.util.ImageUtil.decodeSampledBitmapFromPath(issue.imagePath, 200, 200));
+                // Handle file paths
+                Glide.with(holder.itemView.getContext())
+                        .load(issue.imagePath)
+                        .placeholder(R.drawable.placeholder_image)
+                        .error(R.drawable.placeholder_image)
+                        .into(holder.ivIssue);
             }
+        } else {
+            holder.ivIssue.setImageResource(R.drawable.placeholder_image);
         }
 
         if (holder.llAdminResponse != null && holder.tvAdminComment != null) {

@@ -114,6 +114,12 @@ public class ProviderDashboardActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadProviderData();
+    }
+
     // ... (rest of methods)
 
     private void loadNotices() {
@@ -251,9 +257,20 @@ public class ProviderDashboardActivity extends AppCompatActivity {
                             ImageView ivProfile = findViewById(R.id.ivProviderProfile);
                             if (ivProfile != null && provider.profileImageUrl != null && !provider.profileImageUrl.isEmpty()) {
                                 if (provider.profileImageUrl.startsWith("data:image")) {
-                                    byte[] decodedString = android.util.Base64.decode(provider.profileImageUrl.substring(provider.profileImageUrl.indexOf(",") + 1), android.util.Base64.DEFAULT);
-                                    android.graphics.Bitmap decodedByte = android.graphics.BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                                    ivProfile.setImageBitmap(decodedByte);
+                                    String cleanBase64 = provider.profileImageUrl;
+                                    if (cleanBase64.contains(",")) {
+                                        cleanBase64 = cleanBase64.substring(cleanBase64.indexOf(",") + 1);
+                                    }
+                                    try {
+                                        byte[] decodedBytes = android.util.Base64.decode(cleanBase64, android.util.Base64.DEFAULT);
+                                        Glide.with(this)
+                                                .asBitmap()
+                                                .load(decodedBytes)
+                                                .placeholder(R.drawable.ic_profile)
+                                                .into(ivProfile);
+                                    } catch (Exception e) {
+                                        ivProfile.setImageResource(R.drawable.ic_profile);
+                                    }
                                 } else {
                                     Glide.with(this).load(provider.profileImageUrl).placeholder(R.drawable.ic_profile).into(ivProfile);
                                 }
